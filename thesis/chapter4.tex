@@ -1,0 +1,125 @@
+\chapter{Implementacja modelu wyszukiwania informacji}
+\label{chap:czwarty}
+
+\section{Wykorzystywane rozwiązania}
+
+Zamierzonym celem tego rozdziału jest przedstawienie modelu wyszukiwania informacji w celu pokazania możliwości stworzenia, w stosunkowo prosty sposób, nowoczesnej wyszukiwarki informacji bazując na otwartych i ogólnodostępnych komponentach. Podstawą działania tego systemu jest są przede wszystkim udostępnione dzięki platformie HuggingFace modele językowe: enkoder, reranker i model odpowiadania na pytania. Rozwiązania takie są dostępne w bardzo prosty sposób dzięki wykorzystaniu udostępnionej biblioteki programistycznej języka Python. Należy zaznaczyć, że wykorzystanie takich rozwiązań jest nieodpłatne (w zależności od celu wykorzystania i udzielanej przez twórców licencji), oraz wymaga jedynie zwykłej karty graficznej dla mniejszych modeli. Dodatkowo możemy uruchomić te modele językowe z własnego komputera lub wykorzystując zasoby chmurowe. Drugim z kluczowych wykorzystanych rozwiązań jest biblioteka programistyczna Faiss pozwalająca na wyszukiwanie i klastrowanie gęstych reprezentacji wektorowych. Rozwiązanie to jest udostępniane na licencji wolnego oprogramowania MIT, więc można go używać do dowolnych celów. Według twórców tej biblioteki skaluje się ona nawet do miliardów wektorów. W tej pracy wykorzystujemy Faiss jako indeks wyszukiwarki, który umożliwia różne rodzaje kodowania, szybkie wyszukiwanie, a także płynne przejście na zasoby GPU. Trzecim z elementów jest zbiór danych MS MARCO. Jest to, według naszej wiedzy, największy i jednocześnie jedyny tak kompleksowy zbiór danych pozyskany z jednej z najpopularniejszych wyszukiwarek. Pozwala on, na w miarę obiektywne, porównywanie do tej pory niemożliwej do badania jakości różnych wyszukiwarek i sposobów wyszukiwania.\newline
+
+\begin{itemize}
+\item SentenceTransformers: \url{https://www.sbert.net/}\newline
+\item MS MARCO: \url{https://microsoft.github.io/msmarco/}\newline
+\item Faiss: \url{https://github.com/facebookresearch/faiss/wiki/}\newline
+\end{itemize}
+
+
+\section{Sposób działania systemu}
+Należy mieć na uwadze, że rozwiązanie powstało, aby przetestować możliwości prezentowanego sposobu wyszukiwania. System nie jest w żaden sposób przystosowany, czy też zoptymalizowany jako rozwiązanie wydajne zasobowo do zastosowań produkcyjnych. Struktura kodu zorganizowana została przede wszystkim dla łatwości wprowadzania zmian oraz tak, aby umożliwiała przeprowadzanie różnych eksperymentów. Kod zawiera plik \emph{helper\_funcs.py} z najprzydatniejszymi i często wykorzystywanymi funkcjami. Badania były prowadzone w oddzielnych notatnikach Jupyter Notebook.\newline
+
+Pierwszym z kroków budowy wyszukiwarki było pobranie danych potrzebnych do wypełnienia bazy danych. W naszym przypadku skorzystaliśmy z gotowego zbioru danych MS MARCO zawierającego paragrafy. Pobrane zostały pliki zawierające zapytania, dokumenty oraz dopasowania z oficjalnej strony: \url{https://microsoft.github.io/msmarco/Datasets.html}. Zbiór ten zawiera 8.8 miliona dokumentów przeznaczonych do testowania rozwiązań IR. Następnie każdy z paragrafów został zakodowany do wektorów w gęstej reprezentacji, w wyniku czego uzyskano około 20 GB danych zapisanych w 9 plikach zawierających macierze numpy. Do kodowania użyto model \textbf{all-MiniLM-L6-v2}, który koduje tekst jako 384 wymiarowy wektor. Model ten jest dostępny do pobrania z repozytoriów HuggingFace i dystrybuowany z licencją Apache-2.0 (\url{https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2}). Założenie rzeczonego systemu jest proste: nauczyć się najlepszego modelu reprezentowana tekstu przy użyciu praw skalowania. Przeznaczeniem tego modelu jest kodowanie zdań i paragrafów we wspólnej reprezentacji, którą jest przystosowana m. in. do wyszukiwania informacji. Jeśli chcielibyśmy kodować dłuższe teksty, to trzeba mieć świadomość, że są one skracane do 256 pierwszych wyrazów. Jako podstawowy blok budulcowy tego modelu wykorzystano przyciętą wersję większego modelu \text{MiniLM-L12}, która wykorzystuje co drugą warstwę większego modelu i zawiera zaledwie 6 warstw. Dostrajanie tego modelu wykorzystywało ponad 1 miliard punktów danych z różnych zbiorów, w tym także MS MARCO. Funkcją straty była nagroda kontrastowa. Wybór tego bardzo małego modelu językowego był oczywiście nieprzypadkowy i wynikał z chęci efektywnego wykorzystania ograniczonych zasobów obliczeniowych.\newline
+
+Mając tak przygotowane dane, zakładając, że dysponujemy odpowiednimi zasobami RAM-u, możemy je z łatwością wyszukiwać po dodaniu ich do indeksu Faiss. Indeks Faiss obsługuje wyszukiwanie za pomocą procesora centralnego (CPU), jak również procesora graficznego (GPU). W tej pracy korzystałem przede wszystkim z indeksu typu 'Flat' uruchamianym na GPU. Faiss oferuje wiele różnych niedokładnych indeksów, jak i dodatkowe opcje. Wśród nich znajdują się: IVF - wykorzystujący indeks oparty o kwantyzator z wybraną liczbą centroid, HNSW - oparty o strukturę grafową, kodowanie wektorów przy użyciu np. kodów PQ. Dodatkowo na zbiorze wektorów można wykonać krok wstępnego przetworzenia taki jak np. zmniejszenie przez PCA lub krok dokładnego wyliczenia odległości, pozwalający na dokładne wyszukanie wektorów znalezionych wcześniej przy pomocy przybliżonego indeksu. Rozwiązania takie nie są wykorzystane w tej pracy. Przeprowadziłem kilka małych eksperymentów dla różnych indeksów wykorzystujących te funkcje. Część z nich wydaje się działać dobrze dla tego problemu. Natomiast ponieważ szybkość wyszukiwania w indeksie Faiss nie była wąskim gardłem, a dodatkowo chmura pozwala dowolnie skalować ilość pamięci operacyjnej, nie było powodu używać większości z tych udogodnień. Zwykły indeks typu 'Flat' jest równie dobry dla naszego zastosowania.\newline
+
+Jeśli wykonujemy krok utworzenia ponownego rankingu to wykorzystywanym do tego modelem jest cross-enkoder \textbf{
+ms-marco-MiniLM-L-6-v2} (\url{https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2}) udostępniany przez bibliotekę programistyczną Sentence-Transformers z repozytorium HuggingFace, podobnie jak ma to miejsce przy użyciu modelu kodującego. Według dokumentacji model ten uzyskuje efektywność na poziomem 0.39 dla miary MRR@10 na MS MARCO. Do generowania odpowiedzi skorzystałem z modelu \textbf{tinyroberta-squad2} (\url{https://huggingface.co/deepset/tinyroberta-squad2}). Jest to wydestylowany model RoBERT'a przeznaczony do odpowiadania na pytania ze zbioru SQuAD 2.0, który działa dwa razy szybciej od modelu bazowego przy porównywalnej jakości działania. Do modelu przekazujemy tekst wszystkich pozyskanych paragrafów rozdzielonych tokenem separującym. Możliwe jest, że lepsze rezultaty można uzyskać, przekazując tylko pierwszy lub tylko kilka pierwszych paragrafów albo wykorzystując inne lepsze rozwiązanie. Jednak nawet wykorzystany w bardzo rudymentarnej formie ten zaawansowany model językowy pozwala w bardzo prosty sposób dodać znaczącą funkcjonalność do systemu wyszukiwania. Model jest dystrybuowany na licencji Creative Commons 4.0.\newline
+
+W końcu, stworzone zostało kilka pipeline'ów pozwalających na wyszukiwanie oraz mierzenie eketywności wyszukiwania. W pliku \emph{search\_evaluation.ipynb} zawarto sposób mierzenia MRR@k dla wyszukiwarki. Plik \emph{simple\_search.ipynb} umożliwia proste wyszukanie danego zapytania. Ostatecznie \emph{search\_tests.ipynb} w sposób deterministyczny generuje zestaw wcześniej wylosowanych zapytań, co umożliwia podejrzenie wyników działania i porównanie ich z tymi, które uzyskałem w tej pracy. W \emph{redis\_test.ipynb} pokazano, jak dokonano obliczeń wydajnościowych. Listingi pokazujące najważniejsze elementy rozwiązania znajdują się w dodatku.
+
+\section{Możliwości wykorzystania}
+
+System pozwala na wykonanie pełnego wyszukiwania z możliwością wykorzystania drugiego stopnia ponownego rankingu, oraz 'trzeciego stopnia' uzyskiwania odpowiedzi. Funkcjonalności takie znane są z powszechnie używanych wyszukiwarek internetowych takich jak Google. Przykładowo dla pierwszego zapytania ze zbioru treningowego MS MARCO możemy wygenerować odpowiedź, tak jak to pokazano w Tabeli 4.1. Dodatkowo z modelu TinyRoBERT'a uzyskujemy stopień przekonania modelu o poprawności udzielonej odpowiedzi oraz zaznaczenie miejsca w kontekście, w którym to według modelu znajduje się odpowiedź. Jest to funkcjonalność, która została wdrożona do Google'a praktycznie dokładnie, pomijając odpowiednie modyfikacje wizualne. Ostatnia z prezentowanych wartości oddaje przekonanie autora co do udzielonej odpowiedzi. Znakiem minus został oznaczony brak obiekcji, natomiast znak plus symbolizuje to, że, znalazłem informacje, które w mojej opinii wydawały się bardziej wiarygodne, które przeczą uzyskanej odpowiedzi. W dodatku pokazano w tej konwencji dziesięć zapytań pozyskanych w sposób losowy ze zbioru ewaluacyjnego (dev.small), dla których kontekstem były paragrafy uzyskane z dwustopniowego wyszukiwania w pełnym zbiorze paragrafów MS MARCO. \newline
+
+\begin{table}[htp]
+\centering
+\caption{Zapytanie nr. 1 ze zbioru treningowego}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   \multirow{2}{3em}{Zapytanie} & ")what was the immediate impact of the \\
+    & success of the manhattan project?"\\
+   \hline
+    Wygenerowana odp. & 'hundreds of thousands of innocent lives obliterated' \\
+    \hline
+    Pewność dopasowania &  0.18403230607509613\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+\newpage
+
+Co więcej, aby zobrazować działanie wyszukiwarki, dla kilku z wylosowanych zapytań stworzone zostały tabele tak jak w przykładzie dla zapytania pierwszego z Tabeli 4.2. Zaprezentowane zostało w ten sposób pierwsze dziesięć wyników wyszukiwania, podobnie jak w popularnych wyszukiwarkach internetowych. Dodatkowo wszystkie dziesięć z zapytań, które zostały wybrane, posiada prezentowane dane zapisane w pliku tekstowym, który znajduje się w publicznie udostępnionym repozytorium. 
+
+\begin{table}[htp]
+\centering
+\caption{Zapytanie nr. 1 ze zbioru treningowego}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
+   \hline
+    1 & 'The Manhattan Project and its atomic [...]' & 1 & 4.1254525 \\
+    2 & 'The presence of communication amid scientific [...]' & 0 &  3.8581057\\
+    3 & 'Essay on The Manhattan Project - [...]' & 2 & 3.2710392 \\
+    4 & 'Manhattan Project. The Manhattan Project was [...]' & 7 & 1.7574501 \\
+    5 & 'The Manhattan Project was the name [...]' & 3 & 1.0350964 \\
+    6 & 'Inspired by scientists who feared atomic [...]' & 749027 &  -0.7804665 \\
+    7 & 'Next. Inspired by scientists who feared  [...]' & 749029 & -1.1856941 \\
+    8 & 'In June 1942, the United States [...]' & 8 & -1.4733196 \\
+    9 & 'Nor will it attempt to substitute [...]' & 6 & -2.9964163 \\
+    10 & 'versions of each volume as well [...]' & 4 & -5.106743 \\
+
+\end{tabular}
+\end{table}
+
+
+\section{Badanie efektywności}
+
+Pomiarów dokonano w Google Cloud, wykorzystując instancję z kartą graficzną Nvidia V100. W tabeli 4.3 zaprezentowane są uzyskane wyniki w mierze MRR@10 dla zbioru testowego MS MARCO oznaczonego \emph{dev.small}. Pierwszy wiersz prezentuje wynik uzyskany dla całego zbioru testowego, natomiast kolejne dla pierwszych \textbf{n} przykładów z tego zbioru. Jak widać w tabeli, ze względu na kosztowne obliczanie pełnego rankingu, wykonano pomiar dla jedynie pierwszego tysiąca przykładów ze zbioru. Jeśli chodzi o wyniki uzyskiwane za pomocą samego rankingu bez późniejszego ponownego rangowania, to MRR@10 wynoszący około 0.1727 jest porównywalny z wynikami raportowanymi na stronie MS MARCO dla klasycznego sposobu wyszukiwania BM25. Jest to zadowalający wynik, biorąc pod uwagę fakt, że wykorzystany sposób kodowania posiada raczej niewielkie specjalne dostosowanie do zbioru MS MARCO. Jednak fakt nieprzewyższenia klasycznej, stosunkowo prostej techniki, pozostawia pewien niedosyt. Dla pełnego rankingu na pierwszym tysiącu przykładów z deweloperskiego zbioru testowego uzyskano poważany wynik 0.4401. Według oficjalnych danych używany reranker powinien uzyskiwać wynik nieco poniżej 0.4000 na zbiorze testowym. Zakładając, że rozwiązanie nie jest bezpośrednio konkurencyjne z najlepszymi systemami, które osiągnęły obecnie maksymalnie 0.463 MRR, biorąc pod uwagę prostotę zastosowania, jest to, wydaje się, zadowalający kompromis jakości dla niektórych zastosowań. \newline
+
+
+\begin{table}[htp]
+\centering
+\caption{Wartość MRR@10 dla zbioru testowego MS MARCO}
+\vspace*{5mm}
+\begin{tabular}{llll}
+\hline
+ MRR@10 & Ranking & Pełen ranking & \\
+ \hline
+ dev. small & 0.1727 & - & \\
+ 100 & - & 0.3694 & \\
+ 500 & 0.2660 & 0.4415 \\
+ 1K & 0.2260 & 0.4401 \\
+ 5K & 0.1768 &  - \\
+ \hline
+\end{tabular}
+\end{table}
+
+Jedną uwagą, jeśli chodzi o porównywanie prezentowanych wyników z tymi dostępnymi na stronie MS MARCO, jest fakt, że oficjalne wynik podają MRR@1000. Jednak znając sposób obliczania miary MRR, można dojść do wniosku, że obliczenie MRR dla mniejszej wartości jest przybliżeniem MRR dla większej wartości, ponieważ im niżej w wynikach pojawia się rezultat, tym mniejszy wpływ na MRR. W przybliżeniu MRR@10 nie bierze pod uwagę maksymalnie mniej niż 10\% wartości MRR@1000. W praktyce te różnice są prawdopodobnie dużo niższe.
+
+
+\begin{table}[htp]
+\centering
+\caption{Porównanie szybkości działania biblioteki Dask i bazy danych Redis}
+\vspace*{5mm}
+\begin{tabular}{llll}
+\hline
+  & Dask & Redis & \\
+ \hline
+ 1 & 110.79 & 3.46 & \\
+ 2 & 96.40 & 1.86 & \\
+ 3 & 96.12 & 2.19 \\
+ 4 & 94.79 & 1.86 \\
+ 5 & 94.73 &  1.85 \\
+ \hline
+\end{tabular}
+\end{table}
+
+W czasie eksperymentów biblioteka Dask została zidentyfikowana jako wąskie gardło działania systemu. Przykładowo, gdy chcemy wyszukać, a następnie wykonać ponowny ranking paragrafów, konieczne jest, wyszukanie pełnych tekstów paragrafów znając ich identyfikatory. Początkowo zrealizowane zostało to przy pomocy biblioteki Dask, jednak okazało się, że skutkuje to wyraźnym spowolnieniem działania systemu. Z tego powodu zaimplementowałem inną wersję wyszukiwania z rerankingiem, która korzysta z bazy danych zapisywanej w pamięci operacyjnej — Redis. Tabela 4.4 pokazuje eksperyment przeprowadzony na komputerze osobistym z wykorzystaniem indeksu CPU i miliona zindeksowanych paragrafów. Wyszukujemy i obliczamy ponowny ranking dla dziesięciu wyników, wykorzystując dwa alternatywne rozwiązania. Tabela przedstawia ilość sekund, które zajęło wykonanie pełnego rankingu dla pięciu iteracji zapytań. Okazuje się, że rozwiązanie wykorzystujące Redis jest szybsze o prawie dwa rzędy wielkości.
+
+\section{Wnioski}
+
+Podstawową wadą prezentowanego systemu jest niepełne wykorzystanie bazy danych do zapisania mapowania z reprezentacji wektorowej do tekstu. Zamiast tego użyto biblioteki Dask, która działa podobnie jak popularna biblioteka Pandas. Jak pokazano, baza danych typu \emph{klucz: wartość} może znacząco przyspieszyć wyszukiwanie. Oznacza to oczywiście dodatkowe zapotrzebowanie na i tak eksploatowane przez indeks zasoby pamięci operacyjnej. Inną z potencjalnych wad jest konieczność korzystania z akceleratorów sprzętowych, co może być bardziej kosztowne. Dodatkowo wykorzystanie GPU wiąże się z koniecznością odpowiedniego rozkładania obciążenia obliczeniowego, co wymaga dodatkowych kompetencji programistycznych. Ostatecznie modele deep learningowe mogą nie być bardziej efektywne niż tańsze obliczeniowo klasyczne algorytmy.\newline
+
+Mając to na uwadze, należy zaznaczyć również mocne strony tego podejścia. Wyszukiwanie w indeksie jest właściwie przyspieszone w porównaniu ze zwykłym algorytmem, ze względu na prostą reprezentację i korzystanie z akceleratorów sprzętowych, które są szczególnie opłacalne jeśli będziemy chcieli przetworzyć wiele zapytań jednocześnie, tak jak ma to miejsce np. w obciążonej wyszukiwarce internetowej. Co więcej, każde ulepszenie modelu językowego, którym się dysponuje, powinno prowadzić do lepszego kodowania, a co za tym idzie lepszych uzyskiwanych wyników. Podejście to zapewnia też jednolitość w całym stosie technologicznym, gdyż praktycznie wszystkie moduły obliczeniowe korzystają z identycznych zasobów. \newline
+
+Ciekawym rozszerzeniem, które wymaga jedynie zmiany modelu kodowania, jest wykorzystanie modeli potrafiących kodować różne modalności, takie jak tekst i obraz do wspólnej przestrzeni wektorowej. Umożliwia to bardzo ciekawe interakcje takie jak: wyszukiwanie tekstu przy pomocy obrazu, czy wspólne wyszukiwanie różnych modalności takich jak zdjęcia i tekst. Ważną decyzją podczas kodowania reprezentacji dłuższego dokumentu jest wybór odpowiedniego poziomu granularności (cały tekst, paragrafy, wybrane fragmenty). Problem ten wydaje się w dużej mierze nierozwiązany. Kluczowym dla możliwości działania podobnego systemu jest zoptymalizowana baza danych oraz małe model neuronalne. Generalnie rzec biorąc reranking mógłby odbywać się w całości w nauczonej reprezentacji wektorowej. Mogłoby to sprawić, że reranking byłby potencjalnie wystarczająco szybki do masowego zastosowania. Połączenie modelu językowego z wyszukiwarką pozwala na stworzenie pętli zwrotnej, gdzie model współpracuje z człowiekiem, aby uzyskać jak najlepsze rezultaty. Sygnały w stylu 'relevance feedback' mogą być wykorzystane jako dane treningowe dla rerankera.\newline
+
+Systemy wyszukiwania neuronalnego mogą być konkurencyjną propozycją dla wyszukiwarek na stronach internetowych. Mimo istnienia bibliotek i modeli udostępnionych na licencjach wolego oprogramowania brak jest kompleksowego rozwiązania, które można by wdrożyć bezpośrednio do serwisu internetowego. Dla witryn poszukujących wyszukiwarki wysokiej jakości rozwiązania te mogą stanowić czasami konkurencyjną opcję. Wdrożenie takiego systemu wymaga obecnie jednak ekspertyzy oraz dużej uważności. Jednocześnie wykorzystanie modeli DL do wyszukiwania stwarza nowe pole do konkurencji z gigantami dla start-up'ów takich jak 'Perplexity AI'. Jednocześnie liderzy rynku, tacy jak: Google i Microsoft inkrementalnie wdrażają rozwiązania oparte na sieciach neuronowych do swoich silników. Aby oferować konkurencyjne rezultaty względem klasycznych technik, wyszukiwanie neuronalne musi nie tylko generować lepsze rezultaty, ale również być konkurencyjne pod względem kosztów obliczeniowych. W końcu moim zdaniem, największymi usprawnieniami, które przyniesie wdrożenie uczenia głębokiego do wyszukiwarek, jest interoperacyjność między różnymi modalnościami, koopertywność z innymi modelami uczenia maszynowego oraz wyposażenie modeli, takich jak modele językowe w wydajny moduł pamięci.\newline

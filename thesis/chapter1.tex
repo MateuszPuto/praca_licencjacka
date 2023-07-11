@@ -1,0 +1,366 @@
+\chapter{Klasyczne techniki i zastosowania wyszukiwania informacji}
+\label{chap:pierwszy}
+
+%--------------------------------------------------
+\section{Wyszukiwanie informacji}
+
+Najprostszym, niedojrzałym sposobem wyszukiwania informacji, w pewnym zbiorze dokumentów, jest wyszukiwanie po jasno zdefiniowanych meta-informacjach. Chociaż oczywistym problemem, w korzystaniu z takiego systemu, jest fakt, iż musimy znać wcześniej odpowiednie informacje o wyszukiwanym dokumencie, takie jak nazwisko autora, tytuł czy numer, to tego rodzaju systemy były wykorzystywane nie tylko w urzędach czy bibliotekach, ale również w wyszukiwaniu internetowym do lat 90-tych.\newline
+
+Jako bardziej wygoda metoda wyszukiwania, wykorzystanie znalazł model boolowski. Zakłada on, że dokument jest zbiorem wyrazów, a więc pomija ilość wystąpień, kolejność występowania oraz powiązania między wyrazami. Na jego podstawie można stworzyć system, który po uprzednim zindeksowaniu wyrazów, pozwoli na wyszukiwanie wspólnych
+wystąpień wyrażeń w tekście przy pomocy powiązania ich operatorami AND, OR a nawet NEAR. W roku
+2005 system oparty o model boolowski był nadal wykorzystywany jako domyślny sposób
+wyszukiwania w systemie wyszukiwania dokumentów prawnych firmy Westlaw \autocite[s. 38-56]{introtoinformationretrieval}. \newline\newline
+
+Wykorzystanie tego rozwiązania wiąże się jednak z koniecznością wcześniejszego przetworzenia informacji w dokumentach do postaci wyszukiwalnego odwróconego indeksu. Składa
+się on z pól {\it klucz}: {\it wartość}, gdzie kluczem jest słowo, unikalny identyfikator słowa, ewentualnie
+pewna kombinacja słów taka jak n-gram. Ponadto dla każdego klucza mogą być przechowywane
+dodatkowe informacje, takie jak częstość występowania. W polu wartości przechowywane są powiązane z danym termem dokumenty, a raczej ich identyfikatory, które znajdują się w pewnego
+rodzaju kolekcji. Kolekcja jest często posortowana, a każdy zapis związany z dokumentem może
+posiadać także dodatkowe informacje, na przykład pozycyjne określenie umiejscowienia
+wystąpienia termu w dokumencie. Wartości znajdujące się w odwróconym indeksie są zazwyczaj posortowane, co
+przyspiesza operacje, które chcielibyśmy na nim wykonywać \autocite[s. 104-122]{introtoinformationretrieval}.\newline
+
+Kluczowym uwarunkowaniem dla konstrukcji odwróconego indeksu, dla dużych zbiorów
+danych, jest przechowywanie struktur danych w pamięci. Jeśli indeks jest niewielki to możemy umieścić
+wszystkie dane w pamięci operacyjnej podczas tworzenia, modyfikowania i dostępu, co pozwoli na
+optymalny dostęp do aktualnych informacji. Jeśli nasze wymagania są większe, to możliwe, że część danych
+będziemy musieli składować na dysku, co stwarza dodatkowe wyzwania. Kompresja indeksu pozwala
+na, przechowywanie większej ilości zindeksowanych danych na dysku, a także szybszy przesył pomiędzy
+dyskiem a pamięcią operacyjną. Gdy posiadamy szybki algorytm kompresujący, opłacalnym może być
+również kompresowanie części cache'u indeksu, która jest przechowywana w pamięci, co pozwoli na przechowywanie większej ilości często używanych wyrażeń bliżej procesora, tym samym przyspieszając działanie systemu.\newline
+
+Zapytania, które interesują użytkownika są często bardziej złożone niż logiczna kombinacja słów kluczowych. Jednym z usprawnień, które wyszukujący chce
+mieć do swojej dyspozycji, jest wyszukiwanie parametryczne. Pozwala ono na wybranie pewnego
+interesującego nas przedziału wyszukiwanej wartości. Takie określenie problemu może się sprawdzić
+gdy na przykład, chcemy wyszukać informacje o podanej dacie. Aby przechowywać te dodatkowe dane,
+konieczny jest indeks parametryczny, który może być B-drzewem \autocite{introtoinformationretrieval}. Innym
+możliwym usprawnieniem dla wyszukiwania meta-informacji jest przeszukiwanie tzw. stref
+dokumentu (ang. 'zones'). Umożliwia ono wyszukiwanie informacji występujących w
+konkretnym miejscu dokumentu, chociażby w jego tytule. Dzięki algorytmowi określania rangi dokumentu za
+pomocą ważenia informacji z jego stref (ang. 'weighted zone scoring'), można przypisać wagę do
+wystąpienia danej informacji w pewnej części dokumentu, a następnie sumując te wagi, dla wyszukiwanych informacji we wszystkich strefach, otrzymać
+wynik określający dopasowanie zapytania do dokumentu.\newline
+
+Innym, bardzo znaczącym pomysłem, jest zliczanie wystąpień danego wyrazu w tekście.
+Przyjmując założenie, iż kolejność wystąpień nie ma znaczenia, otrzymujemy model 'bag of words', w dosłownym tłumaczeniu jest to model 'worka wyrazów'.
+Pomija się w nim kolejność występowania wyrazów, traktując dokument jako zbiór termów wraz z
+przypisaną im ilością wystąpień (ang. 'term frequency'). Najlepiej dopasowane dokumenty w takim
+modelu to te, w których wyszukiwane słowa kluczowe pojawiły się najwięcej razy \autocite{introtoinformationretrieval}. Częstość w
+dokumentach (ang. 'document frequency') jest miarą określającą w jakiej ilości dokumentów, spośród ogólnej ich liczby, wystąpił
+dany term. Jest to wielkość, która określa ilość wystąpień we właściwszy sposób niż częstość w korpusie (ang.
+'collection frequency'), z powodu możliwych korelacji częstości występowania słów
+w pojedynczym dokumencie. Na podstawie tej miary tworzy się odwrotną częstość w dokumentach
+(ang. 'inverse document frequency') zdefiniowaną jako logarytm z ułamka dzielącego wszystkie
+dokumenty w korpusie przez ilość tych, w który wystąpił dany term. Rzadsze wyrazy otrzymują więc wyższy wynik
+{\it idf}, niż te które występują częściej. Na podstawie częstości wystąpień i odwrotnej częstości w
+dokumentach, zdefiniowana jest miara \textit{tf-idf} (ang. 'term frequency - inverse document frequency')
+określona jako iloczyn dwóch wartości (\textit{tf} oraz \textit{idf}), dla danego termu w podanym dokumencie.
+Korzystając z tej wielkości możemy przypisać numeryczny wynik dopasowania, poprzez sumację \textit{tf-idf} każdego
+z termów w zapytaniu odwołującym się do zadanej kolekcji dokumentów \autocite[s. 146-172]{introtoinformationretrieval}.
+
+\begin{equation}
+	(tf—idf)_{i,j} = tf_{i,j} \times idf_{i,j}
+\end{equation}
+
+\begin{equation}
+		tf_{i,j} = \frac{n_{i,j}}{\sum_{k} n_{k,j}}
+\end{equation}
+
+\begin{equation}
+	idf_i = \log \frac{\left\| D \right\|}{d_{t_i}}
+\end{equation}
+
+Wychodząc ponad model boolowski możemy przyjąć założenie mówiące, że każdy z
+dokumentów w kolekcji nad którą wyszukujemy może być reprezentowany przez wektor w przestrzeni
+'słów'. Aby skonstruować odpowiadające wektory można skorzystać z pewnej miary będącej
+mapowaniem z termu do liczb naturalnych. Przykładową transformacją tego typu może być {\it td-idf}.
+Wektor dokumentu będzie się składał z wartości odpowiadających wystąpieniom kolejnych elementów posortowanego słownika termów. Taka reprezentacja nazywana jest modelem przestrzeni wektorowej (ang. 'vector space model'). W przestrzeni wektorowej
+możemy obliczać bliskość dla dokumentów za pomocą produktu wewnętrznego pomiędzy wektorami znormalizowanymi do
+wektora jednostkowego, co odpowiada kosinusowi kąta (ang. 'cosine
+similarity') \autocite[s. 157-160]{introtoinformationretrieval}.\newline
+
+Statyczna analiza jakości dokumentu pozwala na określenie wartości dokumentu bez
+zagłębiania się w jego zawartość, natomiast wykorzystując sygnały o jego jakości. Sygnałem może być
+liczba cytować, pozytywnych reakcji, czy popularność. Przy określaniu rangi taki statyczny sygnał o jakości
+może zostać dodany do wartości miary trafności dopasowania \autocite[s. 175-177]{introtoinformationretrieval}. Naturalne wykorzystanie statycznego sygnału
+jakości występuje w modelu probabilistycznym, przedstawionym w dalszej części, gdzie możemy go
+interpretować jako prawdopodobieństwo wystąpienia danego dokumentu [ P(d) ].\newline
+
+Mierzenie wpływu (ang. 'impact ordering') polega na określaniu dopasowania, między
+zapytaniem a dokumentami, skupiając się na wpływie kolejnych termów, zaczynając od tych z
+największą wartością {\it idf} a więc mających potencjalnie największe znaczenie, ze względu na rzadkość występowania. Następnie dokumenty z
+kolekcji są sortowane po częstości wystąpienia termu {\it tf}, aż do momentu osiągnięcia określonej wartości
+progowej lub poprzestając na {\it n} najlepszych dopasowaniach. Proces rankingowy jest
+powtarzany dla kolejnych termów, akumulując wpływy z pojedynczych słów. Kiedy algorytm przejdzie
+wszystkie słowa kluczowe otrzymujemy ostateczny wynik dla zapytania \autocite[s. 177-178]{introtoinformationretrieval}.\newline
+
+Podstawowym pytaniem, które należy sobie zadać przy tworzeniu systemu wyszukiwania
+mierzącego stopień dopasowania, jest kwestia tego, co chcemy osiągnąć poprzez wybrany system
+rankingu. Z filozoficznego punktu widzenia można założyć, że chcielibyśmy zmaksymalizować stopień
+zadowolenia użytkownika wyszukiwarki poprzez dostarczanie, jak najbardziej przydatnych mu informacji, jako pierwszych wyników. Ważną kwestią, w takim przypadku, jest określenie czy
+maksymalizujemy bezwzględną przydatność, pomijając zbieżności, które mogą występować między
+dokumentami, czy preferujemy optymalizować krańcową przydatność, a więc taką która bierze pod
+uwagę zawartość informacyjną innych wysoko pozycjonowanych odpowiedzi do zapytania. Ponadto
+użytkownik oczekuje szybkości działania, ekspresywnych sposobów wyszukiwania, czytelnej
+prezentacji wyników, czy też dużej bazy plików. Wszelkie dodatkowe cechy mogą mieć decydujące
+znaczenie dla osoby korzystającej z danego rozwiązania silnika wyszukiwarki, a jednocześnie
+niekoniecznie są one związane z centralnym sposobem działania \autocite[s. 205-207]{introtoinformationretrieval}.\newline
+
+Wydaje się, iż dobrym sygnałem dopasowania rezultatów wyszukiwania do zadanego
+zapytania byłoby ocenienie jakości wyników przez użytkownika (ang. 'relevance feedback'). Dane te
+można by wykorzystywać do poprawiana jakości systemu wyszukującego wyniki, ale również w celu interaktywnej pracy z wyszukiwarką. W takim układzie użytkownik mógłby wybierać zwrócone wynik,
+które okazały mu się przydatne, natomiast wyszukiwarka próbowałaby ulepszyć kolejne zwrócone
+wyniki na podstawie tego sygnału zwrotnego. W przestrzeni wektorowej wykorzystanie tego pomysłu opiera się na teorii mówiącej, iż aby otrzymać wektor, według którego będziemy
+wyszukiwać, należy do początkowego wektora zapytania dodać średnią ważoną wektorów dokumentów dopasowanych, a następnie odjąć od niej
+średnią ważoną niedopasowanych wektorów wynikowych. Każdy z
+elementów składowych zostaje przemnożony przez wagę, którą można zmieniać w zależności od
+zastosowania. Algorytm Rocchia działa dla kolejnych zapytań następujących po pierwszym z nich. Chociaż rozwiązanie takie wydają się interesujące to dużym problemem, na który
+napotyka, jest niechęć użytkowników do udzielania informacji zwrotnej. Pewne badania pokazują, że
+tylko 4\% użytkowników korzystało z funkcji pozwalającej wyszukać więcej rezultatów podobnych do
+wyświetlonego (opcja 'more like this') \autocite[s. 222]{introtoinformationretrieval}. \newline 
+
+Joachims argumentuje, że aby wykorzystać sygnał zwrotny
+od użytkownika nie trzeba się go o to pytać bezpośrednio, lecz wystarczające informacje znajdują się
+już w logach zbieranych przez wyszukiwarki internetowe. Formalnie możemy myśleć o danych
+dotyczących kliknięć (ang. 'clickthrough data') jako o matematycznej trójce {\it (q, r, c)} zbierającej zadane
+zapytanie {\it q}, odpowiadający mu zwrócony ranking wyników {\it r}, oraz kliknięte rezultaty {\it c}. Ponieważ
+generalnie, linki zwrócone jako pierwsze powinny posiadać wyższe prawdopodobieństwo kliknięcia w
+nie, należałoby myśleć o zebranej informacji raczej jako relatywnym rankingu oceniającym kolejność
+preferowaną przez użytkownika względem tej wyświetlonej. Autor użył modelu uczenia maszynowego
+SVM do modelowania tych zależności. W małym badaniu próbującym ocenić, o ile więcej kliknięć
+generuje nauczona funkcja od wyników z porównywanych wyszukiwarek, m. in. Google, wyniki
+świadczą na korzyść nauczonej funkcji ze znaczeniem statystycznym \autocite{joachimsclickthroughdata}.\newline
+
+Ważnym narzędziem pozwalającym pozbyć się problemu różnego słownictwa (ang.
+'vocabulary mismatch'), między zapytaniem a dokumentami zawierającymi wyszukiwane informacje,
+jest tzw. rozszerzanie zapytania (ang. 'query expansion'). W tym celu często wykorzystywany jest
+tezaurus, który może być wygenerowany automatycznie, pokazujący powiązania między wyrazami takie jak synonimy. Te dodatkowe słowa mogą zostać dodane do zapytania. Przykładowo gdy
+wpiszemy {\it samochód}, dodany zostanie wyraz {\it auto} \autocite{introtoinformationretrieval}.\newline
+
+Rozważając przypadek wyszukiwania w plikach dostępnych przez sieć internetową, należy
+mieć na uwadze fakt, iż większość dostępnych dokumentów jest plikami HTML, plikami CSS, skryptami
+JavaScript, a nie plikami tekstowymi. Pliki tekstowe, ale również obrazy, filmy, pliki audio są zazwyczaj
+dostępne jako część struktury DOM pliku HTML. XPath jest językiem zapytań dla plików XML, który
+może być również rozszerzony o możliwość nawigacji po DOM innych podobnych języków znaczników takich jak HTML5. \newline
+
+Trzecim typem modeli wyszukiwania informacji obok modeli boolowskich i algebraicznych są
+modele probabilistyczne. Ich teoretycznego uzasadnienia można szukać w probabilistycznej zasadzie
+szeregowania (ang. 'Probabilistic Ranking Principle') mówiącej, że dokumenty powinny być
+uszeregowane w kolejności prawdopodobieństwa dopasowania zapytania do dokumentu \autocite{robertson1977}. Nieznając tych prawdopodobieństw, próbujemy je szacować, wykorzystując zasadę Bayesa. Tradycyjnym modelem używanym w tym kontekście jest binarny model z niezależnymi zmiennymi (ang. 'Binary Independence Model'),
+zakładający brak zależności statystycznej pomiędzy elementami wektora opisującymi dokumenty.
+Założenie to daje początek klasyfikatorowi nazywanemu naiwny Bayes (ang. 'naive Bayes'). Założenie
+takie jest oczywiście nieprawdziwe, lecz pozwala na pewne kluczowe uproszczenia. Model
+probabilistyczny daje podstawę teoretyczną podpierającą {\it idf}, przy dodatkowym założeniu, że
+dokumenty określane jako pasujące do zapytania, stanowią zerową część wszystkich dokumentów, co
+zresztą jest często bliskie prawdy. Jednak najbardziej znanym modelem probabilistycznym jest Okapi
+BM25. Wielkością służącą do estymowania jakości dopasowania w modelach probabilistycznych jest
+RSV (ang. 'Retrieval Status Value'). Równanie BM25 jest podobne do {\it tf-idf}, tyle że w równaniu dodane
+są parametry konfigurujące ważność {\it tf} dla dokumentu jak i zapytania, oraz parametr modyfikujący
+wartość RSV dla różnych długości dokumentów \autocite{introtoinformationretrieval}.
+
+\begin{equation}
+	BM25(q, d) = \sum_{i=1}^{|q|} idf(q_i) \cdot \frac{tf(q_i, d) \cdot (k + 1)}{tf(q_i, d) + k \cdot (1 - b) + b \cdot \frac{|d|}{avgdl}}
+\end{equation}\newline
+
+Jeszcze innym podejściem do wyszukiwania są modele językowe (ang. 'Language Model').
+Model językowy generuje rozkład prawdopodobieństwa nad słowami ze słownika. Może być
+zrealizowany jako automat skończony, z którego możemy odczytać prawdopodobieństwa sekwencji.
+Wygenerowany, dla konkretnego dokumentu, model językowy jest używany do określenia
+prawdopodobieństwa warunkowego na otrzymanie zapytania pod warunkiem, że zaszedł warunek
+wystąpienia modelu językowego dla dokumentu. Biorąc znowu pod uwagę twierdzenie Bayesa wiemy,
+że znając prawdopodobieństwo na wystąpienie modelu językowego [ P(Md) ] i prawdopodobieństwo zapytania [ P(q) ], możemy przekształcić otrzymane prawdopodobieństwo warunkowe na zaistnienie zapytania pod warunkiem modelu językowego [ P(q|Md) ] do prawdobodobieństwa na zaistnienie modelu językowego pod warunkiem wystąpienia zapytania [ P(Md|q) ]. Jeśli traktujemy mapowanie z dokumentu do modelu jako zachowujące to
+prawdopodobieństwo [ P(Md|q) \textasciitilde P(d|q) ] to w wyniku mamy wynik dopasowania w probabilistycznym
+podejściu. Najprostszym sposobem wyszukiwania tego rodzaju jest model unigramowy zakładający niezależność
+wystąpień termów w ich sekwencji. Możliwe są również modele bigramowe jak i n-gramowe,
+reprezentujące powiązania między różnymi wyrazami \autocite{introtoinformationretrieval}. Nowe osiągnięcia w dziedzinie sieci
+neuronowych umożliwiły również stworzenie wyrafinowanych modeli języka, co zostało opisane w rozdziale drugim.
+
+
+\begin{equation}
+P(\frac{Md}{q})=\frac{P(\frac{q}{Md})*P(q)}{P(Md)}
+\end{equation}
+
+\begin{equation}
+P(\frac{d}{q}) \sim P(\frac{Md}{q})
+\end{equation}\newline
+
+W tzw. wyszukiwaniu gęstym (ang. 'dense retrieval'), w przeciwieństwie do wyszukiwania
+informacji typu rzadkiego (ang. 'sparse retrieval'), wyszukujemy bezpośrednio w reprezentacji, która
+może przyjmować pewne spektrum obecności danej właściwości. Jako przykład weźmy model
+przestrzeni wektorowej. Aby odnaleźć inne wektory w podobnej odległości, będziemy musieli
+porównać, w najgorszym przypadku, wszystkie inne wektory reprezentujące dokumenty. Aby
+zapobiegać tak niekontrolowanemu wzrostowi złożoności obliczeniowej wprowadza się metody
+ograniczające początkową listę kandydatów. Algorytmy analizy skupień pozwalają podzielić przestrzeń
+wyników w regiony o podobnych reprezentacjach. Dzięki takiemu podejściu, możemy odnaleźć
+najpierw najbliższe skupienia, a kolejno ograniczyć wyszukiwanie do dokumentów znajdujących się w
+środku danej grupy. Jednym z najprostszych algorytmów tego rodzaju jest algorytm centroidów (ang. 'k-
+means'). Polega on na zainicjowaniu {\it k} różnych centroidów, czyli punktów środka masy. Kolejno do
+każdego z punktów, które chcemy przypisać, wybieramy najbliżej leżący centroid. Kiedy wszystkie
+punkty są przypisane, obliczamy ponownie nowe środki masy względem punktów przypisanych do
+danego skupienia. Proces powtarzamy aż osiągniemy zadaną dokładność. Algorytm jest zbieżny do
+minimum lokalnego. Kwestią decyzji pozostaje wybór ilości skupień. Chociaż istnieją heurystyczne
+metody wyboru tego parametru, to są one jedynie przypuszczeniami na temat zasadniczego zbioru danych. Algorytmy analizy skupień są algorytmami uczenia bez nadzoru, a więc szukają wzorców na
+własną rękę, albo mówiąc inaczej: rozwiązują problem maksymalizacji będący zastępcą prawdziwie interesującego nas problemu. Często takie przeformułowanie związane jest z wykorzystaniem pewnego rodzaju złożoności, biorąc pod uwagę fakt preferowania prostszych rozwiązań nad bardziej skomplikowane, w obliczu braku dodatkowych przesłanek. Jednak w wyniku takiej procedury nie możemy być pewni, że znalezione skupienia, choćby
+były najlepiej skoncentrowane, odpowiadają rzeczywistym interesującym nas klasom dokumentów.
+Potencjalnie możliwa jest również hierarchiczna analiza skupień. Efektywnym rozwiązaniem do analizy skupień jest
+biblioteka Faiss od Facebook AI Research (obecnie Meta AI Research), pozwalająca na oszczędne zasobowo obliczenia dotyczące
+skupień \autocite{johnson2019billion}.
+
+%--------------------------------------------------
+
+%--------------------------------------------------
+\section{Zastosowania w wyszukiwaniu pełnotekstowym}
+
+Przed powstaniem wyszukiwarki internetowej
+Google istniały inne rozwiązania służące do poruszania się w sieci. Wiele z pierwszych rozwiązań
+korzystało jednak tylko z tytułów stron albo meta-tagów, które zostały zdefiniowane między innymi
+do tego właśnie wykorzystania \autocite{bernersleehtml}. Jednak problemem stał się stopniowo brak wiarygodności osób i
+instytucji dodających swoje witryny internetowe, które próbując zwiększyć wyszukiwalność swojej
+strony nadużywały możliwości m.in. w zakresie definiowania zawartości swojej strony w meta-tagach
+— proceder zwany spamdexowaniem (ang. 'spamdexing'). Pierwszą wyszukiwarką, która korzystała
+z indeksowania pełnotekstowego, była AltaVista \autocite{altavistahistory}. Indeksowanie całej zawartości strony jest
+trudniejsze, wymaga też większych zasobów przeznaczonych na przeczesywanie stron, jednak daje dużo
+bardziej wiarygodne rezultaty.
+Obecnie technologia wyszukiwania pełnotekstowego jest wykorzystywana również przez
+witryny, które dodają możliwość przeglądania swoich zasobów za pomocą okienka wyszukiwarki.
+Techniki te w odróżnieniu od wyszukiwarek internetowych działają na ograniczonej dziedzinie
+zasobów, na które składa się pewna kolekcja plików tekstowych specyficzna dla danej witryny.
+Istnieje wiele rozwiązań umożliwiających dodanie takiego wyszukiwania \autocite{howtoaddfulltextsearch}. Wśród nich można wyróżnić np. otwartoźródłowe oprogramowanie Apache Lucene, wraz z projektami o nie
+opartymi takimi jak Solr. Dostępnych jest również wiele innych
+rozwiązań pochodzących od różnych dostawców takich usług. Można tu wyróżnić: Google
+Programmable Search Engine, AWS CloudSearch, Elasticsearch, czy też Algolię.\newline
+
+Wyszukiwarki pełnotekstowe są często zbliżone w swoim działaniu do pełnowymiarowych
+wyszukiwarek internetowych, a jednocześnie czasem dzielą się szczegółami dotyczącymi działania
+swoich systemów. Wyszukiwanie pełnotekstowe korzysta u swoich podstaw z
+rozwiązań dziedziny wyszukiwania informacji (IR) i przetwarzania języka naturalnego (NLP). Kluczowym dla działania tych wyszukiwarek są parsowanie, stemming,
+indeksowanie \autocite{howtoaddfulltextsearch}. Aby zapewnić odpowiednią wygodę użytkowania, stosowanych jest wiele udogodnień i
+usprawnień algorytmicznych.
+Przykładowym rozwiązaniem, którego elementy składowe opiszę jest Algolia, której
+pracownicy prowadzą blog dotyczący inżynierii w tej firmie. \newline 
+
+W serii artykułów poświęconych rozwiązaniom
+wykorzystywanym w ich wyszukiwarce zwracają uwagę na wyścig o zasoby, który ma miejsce
+pomiędzy zadaniem wyszukiwania w indeksie a procesem ciągłego indeksowania. Konkurencja ta ujawnia się pod postacią wykorzystania zasobów CPU oraz pojawienia się braku
+możliwości wykonania operacji zapisu, a także odczytu na dysku. Algolia rozwiązuje te problemy poprzez
+utworzenie dwóch procesów systemowych o różnych priorytetach oraz przechowywaniem całego
+indeksu w pamięci operacyjnej \autocite[a]{insidealgoliapart-a}. Użytkownik wyszukiwarki oczekuje, że pole wyszukiwania
+będzie mu podpowiadać możliwe kolejne słowa w zapytaniu. Takie rozwiązanie nosi nazwę
+przyrostowego wyszukiwania (ang. 'incremental search') lub sugestii w czasie rzeczywistym (ang. 'real-time suggestion', 'search-as-you-type').
+Możliwe rozwiązania algorytmiczne pozwalające zastosować taki mechanizm to skorzystanie z
+wcześniej utworzonego drzewa Trie przechowującego przedrostki do indeksowanych wyrazów, w taki
+sposób, że łatwo podać możliwe kontynuacje wyrazów, gdy znamy ich przedrostki. Algolia wykorzystuje
+skompresowane drzewo trie (ang. 'radix tree'), które oblicza wykorzystując minimalną możliwą ilość
+pamięci operacyjnej, aby zwolnić miejsce dla strukury indeksującej \autocite{insidealgoliapart-b}. Przy wpisywaniu danego
+zapytania użytkownicy popełniają błędy we wprowadzonych literach. Aby temu zapobiec silnik Algolii
+oblicza dystans Damerau-Levenshtein'a i przeszukuje słownik dla ograniczonej wielkości błędu w celu znalezienia poprawnej pisowni słowa \autocite
+{insidealgoliapart-c}. Ponadto stosowanymi rozwiązaniami jest lematyzacja i
+powiększanie zapytania o synonimy. Kolejnym stosowanym rozwiązaniem jest podkreślanie wyrazów
+w wyświetlanym wycinku.
+Kiedy znalezione zostaną dokumenty, które pasują do zadanego zapytania, problemem może
+się okazać kolejność ich wyświetlenia. Użytkownik oczekuje, iż dokumenty najbardziej pasujące do
+wyszukiwanego zapytania znajdą się u góry sekcji wyników. W tym celu Algolia wykorzystuje kilka metryk
+określających dopasowanie dokumentu do zapytania. Brane pod uwagę kryteria to m.in.: ilość błędów występujących
+między słowami zapytania a tymi w dokumencie, ilość dopasowanych słów, bliskość występowania
+pomiędzy szukanymi słowami, ważność atrybutu, dokładność - rozumiana jako dopasowanie całkowite
+albo przedrostkowe \autocite{insidealgoliapart-d}. Zamiast obliczać składową wartość rankingu dla każdego atrybutu, silnik Algolia
+stosuje algorytm typu 'tie-breaking', który sortuje wyniki według pierwszego kryterium, a następnie, jeśli
+zachodzi remis dla pewnych pozycji to sortuje je po kolejnych kryteriach aż do momentu, gdy nie
+występują impasy. Takie podejście zapobiega porównywaniu wartości numerycznych charakteryzujących dopasowanie, gdzie
+może zachodzić sytuacja wzajemnego przeważania się kryteriów.
+%--------------------------------------------------
+
+%--------------------------------------------------
+\section{Zastosowania w wyszukiwarkach internetowych}
+
+Istnieją różne rozwiązania pozwalające na wyszukiwanie w sieci, wśród nich: rozwiązanie
+Microsoftu Bing – wbudowane w wyszukiwarkę Edge, Yahoo – posiadające kilkunastoprocentowy
+udział na rynku wyszukiwarek w Japonii \autocite{searchsharejapan}, czy Baidu ze swoim dominującym udziałem w Chinach \autocite{searchsharechina}.
+Jednak niekwestionowanym liderem na globalnym rynku wyszukiwania internetowego pozostaje
+Google ze swoim ponad 90\% udziałem \autocite{searchshare}. Mimo, że nie była pierwszą szeroko używaną wyszukiwarką
+internetową, założona przez Larrego Page'a i Siergeya Brin'a firma tworzy technologię, która stała się
+de facto standardem.
+Wyszukiwarka internetowa działa na różnych płaszczyznach, integrując ze sobą wiele
+procesów informacyjnych. Do działania potrzebuje co najmniej: procesu skanowania zasobów
+dostępnych w internecie przy użyciu automatycznych robotów zwanych pająkami (ang. 'crawler'),
+procesu indeksowania zapamiętującego w efektywny sposób słowa kluczowe i inne informacje o
+stronie, procesu analizy zapytań oraz wyświetlania wyników \autocite{howgoogleworks}. \newline
+
+Kluczowym aspektem dla działania
+wyszukiwarki internetowej jest zebranie danych o stronach, które będzie można później zwrócić jako
+wyniki. Dane te pomimo posiadania swojej wewnętrznej logiki, są semistrukturalne lub
+nieustrukturyzowane, a więc wymagają różnorodnego przetworzenia, aby wydobyć z nich użyteczne
+informacje. Jest to główny czynnik, obok samej skali działania, odróżniający wyszukiwanie internetowe od wyszukiwania
+pełnotekstowego.
+Przeczesywanie stron internetowych za pomocą robotów, w kontekście wyszukiwania
+informacji, ma na celu odnalezienie, przetworzenie i zapamiętanie informacji o stronie, potrzebnych do jej
+odnalezienia podczas późniejszego wyszukiwania. Pająk sieciowy zaczyna swoje poszukiwania od pewnego zbioru
+adresów URL, zwanych ziarnem (ang. 'seed URLs'). W klasycznej teorii przeczesywania stron
+zakłada się, że każda strona w sieci jest osiągalna przez pewien adres URL. Za adresy ziarna wybierane
+zaś były strony posiadające odnośniki do wielu innych stron. Jednak obecnie, założenie o osiągalności
+każdej strony przez unikalny adres URL, do którego można dotrzeć z głównej strony danej witryny, jest wątpliwe.
+Istnieją witryny generujące swój widok interaktywnie w odpowiedzi na akcje użytkownika i przy tym
+nieodsyłające do nowego adresu. Problem ten adresuje nowy kierunek badań nazywany po angielsku
+'deep web-crawling' \autocite{mirtaheri2014brief}. Głównymi cechami definiującymi użyteczność pająka są pokrycie (ang.
+'coverage') i świeżość (ang. 'freshness'), które określają kolejno jaki udział wszystkich stron został odwiedzony przez pająka oraz jak dawno miało to miejsce. Dodatkowo ważnym atrybutem dla nowych, głębokich
+pająków jest pełność (ang. 'completeness') pokrycia zasobów z danej witryny \autocite{mirtaheri2014brief}. Ponieważ pająki
+mogą odwiedzać strony internetowe o wiele szybciej niż ludzie, to aby nie nadwyrężać zasobów serwera, i
+potencjalnie narażać się na ograniczenia dostępu do niej, pająki stosują zasadę uprzejmości (ang.
+'politeness policy'), która opóźnia wysyłanie kolejnego żądania o przynajmniej kilka do kilkudziesięciu
+sekund.
+Każdy pająk posiada swoją strategię poruszania (ang. 'crawl policy'). Definiuje ona, w jakiej
+kolejności powinny być odwiedzane linki, które zostały zebrane do kolejki. Kiedy robot odwiedza
+stronę uzupełnia kolejkę o linki do stron z niej wychodzących w celu ich sukcesywnego przeczesania. Zazwyczaj pająki
+internetowe korzystają ze strategii rozwijania najpierw najpłytszych rozgałęzień (ang. 'breadth-first'), albo też zaczynając od rozwijania jednego rozgałęzienia do końca (ang. 'depth-first'). Niedawne badania
+sugerują strategię chciwą, jako lepszą alternatywę dla poruszania się po bogatych aplikacjach
+internetowych (RIA) \autocite{mirtaheri2014brief}. W celu utrzymania wysokiej świeżości stron roboty odwiedzają
+witryny ponownie. Proces ten jest kontrolowany przez strategię ponownych odwiedzin (ang. 're-visit
+policy').
+Pająki identyfikują się podczas korzystania z zasobów poprzez pole 'User-agent' w nagłówku zapytania. Uprzejmy
+pająk wchodzący na stronę sprawdza plik 'robots.txt', który zawiera specyfikację udzielonych
+zezwoleń na dostęp do zasobów dla określonych robotów. Plik ten jest zdefiniowany według reguł
+Robots Exclusion Protocol \autocite{googlerobots}. Zbiór reguł zawartych w 'robots.txt' może chronić przed nieumyślnymi pułapkami
+na roboty (ang. 'spider trap'), która występuje, gdy działanie pająka zapętla się na danych podstronach.
+Taka sytuacja ma miejsce, chociażby przy nieskończonych, generowanych zasobach, takich jak te występujące przy korzystaniu z
+automatycznie generowanego internetowego kalendarza.
+Ważnymi elementami architektury klasycznego pająka internetowego jest używanie
+wielowątkowego pobierania w celu zwiększenia przepustowości, czarna lista witryn znanych jako
+nieprzyjazne dla robotów, program do normalizacji adresów URL – konieczny, żeby nie odwiedzać
+identycznego adresu dwoma różnymi ścieżkami \autocite{mirtaheri2014brief}. Architektura nowoczesnego głębokiego pająka
+uruchamia RIA na silniku JavaScript. Następnie moduł 'DOM-Seen' sprawdza, czy dany obiektowy
+model dokumentu (DOM) był już widziany. Jeśli nie był, to przeprowadzana jest ekstrakcja wszystkich
+JavaScriptowych zdarzeń, których kolejność uruchomienia określana jest przez strategię \autocite{mirtaheri2014brief}. Google stosuje dwa rodzaje robotów: mobilny i desktopowy. Są one uruchamiane na tysiącach
+komputerów w lokalizacjach geograficznych ułatwiających dostęp do treści \autocite{googlebot}. Po uzyskaniu zawartości
+witryny Google próbuje ją zindeksować, biorąc pod uwagę: tekst, tagi, atrybuty treści oraz inne zasoby
+takie jak obrazy czy filmy. Sprawdzane też, jest to, czy dana strona jest duplikatem innej już
+zindeksowanej strony \autocite{przewodnikgoogle}. Różne informacje na temat zbieranych informacji oraz wyszukiwań, dzięki
+którym użytkownik odnalazł naszą stronę, można uzyskać w Google Search Console.\newline
+
+Wyszukiwarka Google została stworzona początkowo, aby przetestować algorytm PageRank.
+Był on motywowany różnorodną jakością witryn internetowych i próbą zmierzenia ich
+jakości za pomocą łączących je linków — podobnie jak w publikacjach naukowych. PageRank oblicza
+w sposób iteracyjny rekursywne równanie na ranking strony. Interpretacją tego procesu jest błądzenie
+losowe po stronach (ang. 'random walk', 'random surfer'). Ponadto do równania dodajemy wektor
+będący odpowiednikiem znudzenia się użytkowania i przejścia do losowej strony. Ten mechanizm
+zapobiega drenażowi rankingu (ang. 'rank sink'). Sytuacji, w której linkujące tylko do siebie strony zbierają
+niewspółmierną ilość rankingu. PageRank znacząco poprawia precyzję uzyskiwanych wyników, co jest
+ważne dla niedodefiniowanych zapytań. Algorytm może być również przydatny przy określaniu
+kolejności odwiedzania stron przez pająki internetowe, będąc lepszym predyktorem ilości cytowań od
+samej liczby znanych cytowań \autocite{pagerank}.\newline
+
+Wykorzystywanym w Wyszukiwaniu Google narzędziem jest NoSQL-owa baza danych BigTable, która jest wielowymiarową posortowaną tablicą asocjacyjną indeksowaną w
+oparciu o klucz rzędu oraz kolumny i posiadającą związany z nią znacznik czasu. Dane przechowywane
+są jako nieinterpretowany ciąg bajtów. Każdy zapis, jak i odczyt z pojedynczego rzędu jest atomiczny.
+Rekordy są przechowywane w kolejności leksykograficznej. Kolumny posiadają swój rodzaj zwany rodziną, który pozwala na
+optymalizację zapisu. BigTable jest wyposażona w możliwość przechowywania do {\bf n} wersji
+dokumentu z różnymi czasami dodania pod jednym kluczem. Rozwiązanie to używa Google File System
+do magazynowania logów i plików, może być również używane wraz z rozwiązaniem MapReduce umożliwiającym
+paralelizm obliczeń na wielu komputerach \autocite{bigtable}. Formatem przechowywania danych jest wewnętrzny Google format SSTable. Występuje oddzielenie struktur danych przechowywanych w systemie plików
+Collosus, a samymi klastrami obliczeniowymi, które wykonują operacje dla serwera frontendowego \autocite{bigtableoverview}.
+Rozwiązanie opiera się na architekturze 'master-slave' gdzie jeden serwer zarządza zadaniami,
+zajmuje się balansowaniem obciążenia serwerów, odśmiecaniem pamięci, a reszta odpowiada za
+przechowywanie oraz obsługę żądań. BigTable korzysta z kompresji, która dzięki lokalizacji podobnych
+plików z jednej witryny niedaleko siebie, osiąga poziom 10 do 1. Filtry Blooma są preferowane ponad
+wyszukiwanie binarne, żeby przyspieszyć sprawdzanie istnienia rekordów \autocite{bigtable}.
+
+%--------------------------------------------------

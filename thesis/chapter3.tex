@@ -1,0 +1,161 @@
+\chapter{Porównanie metod wyszukiwania informacji}
+\label{chap:trzeci}
+
+Od pewnego czasu sieci neuronowe są nieodzowną częścią skutecznej architektury wyszukiwania informacji. Może najbardziej widocznym z miejsc użycia jest wykorzystanie ich do tworzenia finalnego rankingu stron, problem zwany w angielskiej literaturze LTR (ang. 'Learning To Rank'). Rozwiązania, korzystające zazwyczaj z sieci transformera, są najlepszymi rozwiązaniami obecnego stanu techniki w tym zakresie. Drugim z bardziej oczywistych zastosowań uczenia głębokiego jest uczenie reprezentacji dokumentów i zapytań. \autocite{tonellotto2022lecture}  Poza tymi, bardziej klasycznymi tematami wyszukiwania informacji, można by rozszerzyć badaną dziedzinę potencjalnych zastosowań uczenia maszynowego o dodatkową problematykę. Podstawowym ulepszeniem, które wydaje się obecnie zyskiwać na popularności, jest wykorzystanie modeli językowych do syntezowania ostatecznej odpowiedzi. Użytkownik otrzymuje wtedy oprócz listy linków, pewien rodzaj zredagowanego tekstu będącego odpowiedzią na zadane pytanie. Co więcej, możliwym wydaje się jest sformułowanie problemu wyszukiwania tak, aby określić go jako rodzaj problemu uczenia ze wzmocnieniem gdzie możliwym byłoby wykorzystanie technik tego działu wiedzy, które odniosły już sukcesy w grze Go - AlphaGo, szachach - AlphaZero czy grze komputerowej StarCraft - AlphaStar. Ten kierunek badań jest na razie ograniczony, niemniej jednak został rozpoczęty. Wydaje się to być interesujące pole dla przyszłych prac naukowych. 
+
+%-------------------------------------------
+\section{Modele wyszukiwania informacji}
+
+\subsection{Dostrajanie BERT'a}
+
+Jednym z pierwszych udanych zastosowań BERT'a do wyszukiwania informacji był system zaproponowany przez Nougeirę i Cho. Dostroili oni model na zbiorze anotowanych paragrafów MS MARCO, tak aby po uprzednim zwróceniu rezultatów przez BM25 oceniał czy zadany paragraf pasuje do zapytania, czy też nie. Pozwoliło im to osiągnąć 27\% relatywną poprawę względem najlepszego wtedy rezultatu, jeśli chodzi o miarę MRR@10 dla rerankingu\autocite{nogueira2019passage}.
+
+\subsection{doc2query i docTTTTTquery}
+
+Znaną techniką ulepszania wyników wyszukiwania jest rozszerzanie zapytania lub dokumentu o pewne słowa kluczowe, które nie pojawiają się bezpośrednio w tekście, a dobrze opisują zawartość danego zapytania lub też dokumentu. Autorzy rozwiązania \emph{Doc2query} proponują rozszerzać dokumenty o pytania przy użyciu modelu seq-to-seq wytrenowanego na zbiorze składającym się z dokumentów i pasujących do ich zawartości pytań. Wytrenowany w ten sposób transformer jest używany do predykcji 10 pytań przy użyciu metody próbkowania modeli językowych nazywaną próbkowaniem k-najlepszych (ang. 'top k-sampling'), która wybiera \emph{k} najbardziej prawdopodobne ciągi tokenów. Wygenerowane w ten sposób pytania są dołączane bezpośrednio do dokumentów, a następnie indeksowane i wyszukiwane przy pomocy algorytmu BM25. Dodatkowym krokiem, używanym opcjonalnie przez autorów, jest ponowne obliczenie rankingu przy pomocy rozwiązania opartego o BERT. To proste rozwiązanie osiągnęło w czasie publikacji wynik zbliżony do rekordowych wyników na tablicy wyników dla zbioru MS MARCO.  \autocite{nogueira2019document} \newline
+
+DocTTTTTquery jest bezpośrednim ulepszeniem doc2query, które wykorzystuje model T5 do generowania pytań. Parametry i sposób treningu są bardzo podobne do wcześniejszego podejścia dlatego pomijamy ich opis. \autocite{nogueira2019doc2query} Prosta modyfikacja pozwala znacząco poprawić wyniki działania całego systemu. Jednocześnie praca ta empirycznie potwierdza sensowność użycia T5 do generowania pytań odnoszących się do bazowego tekstu.  
+
+
+\subsection{ColBERT}
+
+Chociaż model BERT może być dostrojony do zadania wyszukiwania informacji i osiągać wyniki wykraczające poza klasyczne metody, to często wiąże się to z nadmiernym dodatkowym kosztem obliczeniowym. Nawet 100-1000 większym niż poprzednie metody, co jest związane z koniecznością
+uruchomienia pełnego modelu dla każdej pary zapytania i dokumentu, której zgodność sprawdzamy.
+ColBERT, wykorzystujący model BERT u swojej podstawy, buduje dwie oddzielne reprezentacje, które
+łączy w kroku późnej interakcji. Dzięki takiej konstrukcji obliczenie reprezentacji dokumentów może
+odbywać się jako krok wstępnego przetwarzania, co znacząco przyspiesza działanie podczas szukania.
+Aby obliczyć dopasowanie, autorzy ColBERT'a proponują operację sumy z maksimum operacji podobieństwa
+będącej kosinusem między wektorami reprezentacji (maxSim). Kiedy dokumenty zostaną
+zindeksowane poprzez zapisanie wartości ich reprezentacji na dysku, przydatnym dla dużych zbiorów danych może być rozdzielenie procesu wyszukiwania na dwa etapy. W pierwszym, przy pomocy
+biblioteki do obliczania podobieństwa i klastrów FAISS wszystkie reprezentacje są rozdzielane na 1000
+klastrów, z których zawartość najbliższych 10 jest przesyłana do kolejnego etapu. W drugiej fazie
+przetwarzania, wszystkie otrzymane elementy są szeregowane poprzez bezpośrednie obliczenie
+dopasowania nazywanego maxSim. ColBERT oferuje znaczące przyspieszenie na zadaniu ponownego
+rankingu wyników względem modelu opartego o sam BERT, jednocześnie zachowując konkurencyjną
+jakość działania w porównaniu do starszych modeli BM25, KNRM czy Duet  \autocite{khattab2020colbert}.
+
+\subsection{DeepImpact}
+
+DeepImpact jest modelem mającym zastosowanie jako pierwszy stopień wyszukiwania.
+Rozwiązanie wykorzystuje rozszerzanie dokumentu przez DocT5Query. System ten działa podobnie do
+Doc2query, ale oparty jest o model językowy T5. Dokument, który został rozszerzony poprzez dodanie
+dodatkowych wyrażeń po tokenie separującym, jest przetwarzany przez model językowy BERT, aby
+otrzymać osadzone wektory. Tokeny pojawiające się ponownie są maskowane, a następnie każde
+pierwsze pojawienie się tokenu jest przetwarzane przez sieć MLP z dwoma warstwami. W wyniku
+otrzymujemy pojedynczą wartość dla każdego z tokenów reprezentującą jego wpływ na ważność
+dokumentu. Te wartości można zsumować, aby otrzymać końcowe dopasowanie. Dla danego
+zapytania, jego dopasowanie jest modelowane jako suma wartości wpływu wszystkich słów, które
+pojawiają się w zapytaniu, jak również w dokumencie. DeepImpact jest wytrenowany na
+paragrafowym zbiorze MS MARCO, gdzie danymi treningowymi jest trójka zapytanie, pasujący i
+niedopasowany paragraf. Nauczone w ten sposób wartości wpływu słów mogą być wykorzystane przy
+konstrukcji indeksu. Autorzy porównują wynik swojego modelu do DocT5Query uzyskując
+kilkunastoprocentową przewagę, a dodatkowo przy zastosowaniu jako pierwszy stopień wyszukiwania
+wraz z ColBERT'em osiągają porównywalne wyniki efektywności przy około 5-krotnym przyspieszeniu
+działania \autocite{mallia2021learning}.
+
+\subsection{PROP}
+
+Chociaż rozwiązania oparte o BERT są mocnym modelem porównawczym, to pierwotne
+zadania treningowe dla tego modelu: wypełnianie luk oraz przewidywanie następnego pasującego
+zdania, są bardziej przydatne przy tworzeniu rozwiązań dotyczących rozumowania w języku
+naturalnym, niż odpowiadające zadaniu wyszukiwania informacji. Autorzy opisywanego opracowania
+proponują PROP jako metodę wstępnego treningu sieci Transformer w oparciu o zadanie
+przewidywania prawdopodobieństwa zapytania. Użyto dwóch zadań. W pierwszym, dla dokumentu w
+zbiorze uczącym, obliczany jest klasyczny probabilistyczny model językowy. Na jego podstawie
+generowane są słowa zapytania poprzez modelowanie prawdopodobieństwa warunkowego P(Q|D)
+wykorzystując, chociażby model unigramowy. W zadaniu treningowym generowane są dwa takie
+zapytania wraz z odpowiadającymi im prawdopodobieństwami, a model jest uczony przewidywać na
+tokenie "[CLS]", przetworzonym kolejno przez dodany perceptron wielowarstwowego,
+prawdopodobieństwo każdego z zapytań. Ponieważ PROP jest trenowany od zera, to dodatkowym
+zadaniem jest maskowane modelowanie języka, gdzie model próbuje przewidzieć tokeny zakryte
+poprzez specjalny token maskujący, podobnie jak w BERT. Model PROP jest wytrenowany na danych
+pochodzących z angielskiej Wikipedii oraz na MS MARCO, a także testowany, w dosyć skomplikowany
+sposób, na aż pięciu różnych zbiorach danych, w porównaniu z kilkoma różnymi metodami
+wyszukiwania informacji z grupy porównawczej. Model ten osiągnął bardzo silne wyniki, pobijając
+SOTA w czterech z pięciu zadań. Może on być dostrojony do specyficznego zadania z dziedziny IR i
+sprawdzać się w tym kontekście lepiej od innych modeli językowych \autocite{ma2021prop}. W 2021 roku PROP 400 tysięcy
+iteracji w wersji ensemble wraz z doc2query osiągnął pierwsze miejsce w rankingu MS MARCO \autocite{albertma-prop}.
+
+\subsection{Condenser i coCondenser}
+
+
+Wykorzystanie pretrenowanych modeli językowych, jakkolwiek popularne w zastosowaniach
+wyszukiwania informacji, wiąże się z jeszcze inną niedogodnością. Modele takie jak BERT, czy T5 są
+modelami przetwarzania tekstu, zwracającymi rozproszoną reprezentację tokenów, którą można
+interpretować jako tekst. Model BERT posiada co prawda token klasyfikacji "[CLS]", dla którego wielu
+autorów zmieniało przeznaczenie na token reprezentacji, lecz nie jest jasnym czy taka formulacja jest
+lepsza niż, na przykład średnia ze wszystkich tokenów, a ponadto takie zastosowanie nie było
+zamysłem architektury. Na podstawie analizy aktywacji mechanizmu uwagi (ang. 'attention') autorzy
+zauważają, że token klasyfikacji nie jest aktywnie połączony z innymi tokenami w środkowych
+warstwach modeli językowych, a uaktywnia się dopiero w ostatnich warstwach. Według autorów, nie
+jest to idealna sytuacja, gdy celem jest utworzenie bi enkodera (ang. "bi-encoder"), który będzie
+zwracał całkowitą informację ze wszystkich warstw jak reprezentację do porównania. Jako rozwiązanie
+zaproponowany jest model Condenser zawierający dodatkowe krótkie połączenie bezpośrednio z wczesnych warstw, które połączone z późną reprezentacją jest przetwarzane przez głowę (ang.
+"head"). Nagrodą jest suma funkcji cross-entropy na zadaniu maskowanego modelowania językowego
+dla głowy Condensera i ostatniej warstwy modelu, co jest motywowane późniejszym odrzuceniem
+głowy po wczesnym treningu. Model wytrenowano na podobnych danych, a także w podobnym
+rozwiązaniu jak BERT. Dla zadania wyszukiwania informacji model jest dotrenowywany na zbiorze MS
+MARCO z nagrodą kontrastową. Architektura daje dobre wyniki, znacząco przebijając zwykły model
+BERT. Ta praca naukowa pokazuje, że bazowy model BERT będący w szerokim zastosowaniu w
+dziedzinie wyszukiwania informacji, nie posiada idealnej struktury do generowania reprezentacji, a w
+szczególności do wykorzystania jako bi enkoder \autocite{gao2021condenser}.
+Używając Condensera pozwalającego na efektywną reprezentację tekstu w tokenie
+klasyfikacyjnym, Gao i Callan rozbudowali swoje rozwiązanie o coCondenser. System jest trenowany
+na nagrodzie mającej być odzwierciedleniem semantycznej relacji odległości między dokumentami.
+Dokładniej nagroda jest kontrastowym błędem, obliczanym podobnie jak to opisano w poprzednich
+paragrafach, wynikającą z odległości między reprezentacjami wycinków z pasujących dokumentów i
+tych z grupy porównawczej. Dodatkowo do nagrody dodano błąd z maskowanego modelowania języka i obliczono średnią z obu. Trening inicjowany jest wagami z modelu BERT base i trenowany jak to
+zostało opisane w publikacji dot. Condensera. Następnie w fazie drugiej treningu, powtarzany jest
+trening wstępny na MS MARCO i Wikipedii, tym razem z nagrodą dla coCondensera. Użyto
+optymalizatora AdamW. Po wstępnym treningu odrzuca się głowę pozostawiając sam enkoder z
+architekturą identyczną do BERT'a. Model jest dostrajany na MS MARCO \autocite{gao2021unsupervised}. Wersja tego algorytmu
+osiągnął pierwsze miejsce w rankingu MS MARCO dla rankingu dokumentów.
+
+
+\subsection{HLATR}
+
+
+HLATR jest rozwiązaniem służącym jako trzeci stopień wyszukiwania. Nowoczesne systemy
+wyszukiwania są zbudowane jako dwustopniowe architektry. W pierwszym stopniu opartym na
+budowaniu oddzielnej reprezentacji dla dokumentu i zapytania a później ich połączeniu znajduje się
+dokumenty kandydujące. Takimi rozwiązaniami są klasyczny BM25, ale również w modelach dualnych
+kodujących oddzielnie dokument i zapytanie, przykładowo może to być ColBERT. Drugi stopień jest
+często interakcyjny, a więc oblicza dopasowanie dla każdej pełnej pary dokumentu i zapytania. Jako
+drugi stopień autorzy wykorzystują coCondenser i ANCE. Motywacją do stworzenia trzeciego stopnia
+jest obserwacja pokazująca, że kombinacja wyników z pierwszego i drugiego stopnia może dać lepszy
+rezultat niż używanie bezpośrednio wyników końcowych ze stopnia drugiego. Ponadto autorzy
+proponują użycie nagrody uczenia opartej o uczenie kontrastowe, gdzie nagroda jest uwarunkowana
+jako ujemna wartość logarytmu z ułamka, gdzie licznik jest dopasowaniem dla dokumentu pasującego,
+natomiast mianownik jest sumą dopasowań dla dokumentów z grupy porównawczej. Wejściem do
+HLATR jest reprezentacja wynikowa otrzymana dla każdej pary dokument, zapytanie, połączona z
+kodowaniem pozycyjnym według otrzymanego rankingu. Modelem wyboru jest Transformer, ale sieć osiąga gorsze, choć porównywalne wyniki przy użyciu innych modeli. Jako wyjście otrzymujemy nowy ranking. Okazuje się,
+że po uprzednim wytrenowaniu otrzymujemy wyniki lepszej jakości niż w dwustopniowym układzie.
+Przesądzające o użyteczności HLATR jest jego złożoność czasowa, osiągnięta dzięki małemu modelowi,
+wynosząca 2ms dla 1000 zapytań w porównaniu z kilkuset milisekundowymi kosztami uruchomienia
+BERT'a dla identycznej liczby zapytań \autocite{zhang2022hlatr}.
+
+% ------------------------------------------
+\section{Modele QA - odpowiadania na pytania}
+
+Dziedziną, która może przyczynić się do zmiany sposobu korzystania z informacji dostępnych w internecie jest MRC ('Machine Reading Comprehension'), czyli rozwiązania pozwalające na rozumienie, a także wykonywanie zadań, na podstawie zdobytych informacji, przez maszyny. Modele językowe są przeznaczone przede wszystkim do generowania tekstu podobnego do tego, który stworzyłby człowiek. Mimo, iż w procesie uczenia na gigantycznej części tekstów z internetu są w stanie zdobyć pewną generalizację swoich umiejętności, taką jak np. dodawanie liczb do pewnego ograniczonego rozmiaru, to równie widoczne są ich niedoskonałości. Jedną z najczęściej opisywanych są tak zwane 'halucynacje' czyli sytuacje gdy model językowy wymyśla lub zgaduje pewne informacje, które nie były dla niego dostępne ani podczas treningu, ani w fazie ewaluacji. Zostało udowodnione, że rozwiązania te są w stanie zapamiętać część faktów o świecie w wagach sieci neuronowej, jednak nie posiadają zazwyczaj żadnej zewnętrznej bazy wiedzy lub pamięci długotrwałego zapisu z której mogłyby nauczyć się korzystać. Można więc przypuszczać, że problemy 'halucynacji' mogłyby zostać rozwiązane gdyby model został dostosowany do używania pewnego rodzaju zewnętrznej pamięci posiadającej poprawne informacje o świecie.\newline
+
+Bardziej generalnym podejściem do odpowiadania na postawione pytania jest OpenQA, czyli otwartodziedzinowe odpowiadanie bez posiadanego kontekstu. Przy rozwiązaniach typu MRC wymagany jest generalnie, pewien tekst określany kontekstem, na podstawie którego system generuje odpowiedź. Natomiast w zadaniu typu QA, generator nie ma dostępu do informacji lub korzysta z ogólnie dostępnych danych znajdujących się np. w internecie. Wyszukiwanie informacji dostarcza gotowego rozwiązania, które może generować kontekst dla generatora odpowiedzi. Przy użyciu odpowiednich procedur treningowych możliwym staje się wykorzystanie bazy dostępnych dokumentów do poprawy efektywności działania systemu odpowiadania na pytania. Typową obecnie architekturą dla zadań OpenQA jest połączenie 'Wyszukiwarka-Czytnik' (ang. 'Retriver-Reader'), gdzie pierwsza część wyszukuje dokumenty, a druga generuje odpowiedź. Architektura może być złożeniem dwóch oddzielnych systemów lub być trenowana wspólnie w reżimie \emph{end-to-end}. Pierwszy moduł jest rozwiązaniem wyszukiwania informacji, drugi może być neuronalnym systemem MRC.\autocite{zhu2021retrieving} W porównaniu do zwykłego zadania rozumienia tekstu, mamy w tym wypadku do czynienia z wieloma odnalezionymi paragrafami zamiast tylko jednego, co niewątpliwie komplikuje problem. Możliwa jest budowa czytnika jako rozwiązania odnajdującego w dokumentach odpowiedni cytat odpowiadający na postawione pytanie lub rozwiązanie syntezujące odpowiedź. Tworzenie odpowiedzi będzie zazwyczaj oparte o dostarczone paragrafy/dokumenty, chociaż może działać również bez kontekstu. Mielibyśmy wtedy do czynienia z architekturą samego czytnika, tak jak ma to miejsce w przypadku chociażby GPT-3. \autocite{zhu2021retrieving} W tej sekcji skupiamy się jednak na architekturze dwuwarstwowej.
+ 
+% ------------------------------------------
+\subsection{Wykorzystanie wyszukiwania paragrafów wraz z modelami generatywnymi do zadań OpenQA}
+
+Metody wyszukiwania informacji i modele generatywne wydają się być świetnie dopasowanym połączeniem, które pozwala na zniwelowanie wad i uwydatnienie mocnych stron obu podejść. Z jednej strony, wyszukiwarki posiadają nieporównywalne zdolności przywoływania informacji w danym kontekście, natomiast sposób ich przedstawienia jako listy linków, pozostawia wiele do życzenia. Z drugiej perspektywy, językowe modele generatywne posiadają wysokie zdolności tworzenia i przedstawiania informacji w zachęcający dla człowieka sposób, lecz brakuje im często wiedzy o świecie co skutkuje generowaniem treści, które w najlepszym razie można interpretować jako wytwory literackie. \newline
+
+Prace, takie jak ta zatytułowana 'Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering', podejmują próbę połączenia tych podejść w celu osiągnięcia przewyższających inne systemy rezultatów w dziedzinie OpenQA. Paragrafy są zwracane przy użyciu BM25 lub gęstego wyszukiwania neuronalnego (DPR) w zależności od wykorzystywanego zbioru danych. Generatorem odpowiedzi jest przystosowany model T5, który został dotrenowany przy użyciu zbiorów odpowiadania na pytania: NaturalQuestions, TriviaQA i SQuAD. Wejściem dla generatora jest konkatenacja uzyskanych paragrafów w fazie wyszukiwania.\autocite{izacard2020leveraging} Rozwiązanie ma przewagę nad podejściami ekstrakcyjnymi i czysto generatywnymi na zbiorze NQ i TriviaQA. Dodatkowo, zostało zauważone, że efektywność systemu skaluje się z ilością dostarczonych do generatora danych, nawet do 100 paragrafów, co zdaje się potwierdzać ich przydatność w generowaniu ostatecznej odpowiedzi. \autocite{izacard2020leveraging}
+
+% ------------------------------------------
+\subsection{REALM}
+
+Wcześniejszym podejściem do ekstraktywnego generowania odpowiedzi przy pomocy wspólnie uczonego systemu wyszukiwania i odpowiadania był REALM.  
+Rozważany problem został rozbity na dwa kroki. Zaczynając od kroku wyszukiwania, system zwraca dokumenty związane z zapytaniem. Następnie bazując na dokumentach i zapytaniu generowana jest odpowiedź. Określenie pasujących dokumentów polega na zwróceniu rozkładu prawdopodobieństwa nad dokumentami. Zrealizowane zostało to przez obliczenie reprezentacji przy pomocy kodowania przez sieć transformera, tak że otrzymujemy wektor. Między wektorami dokumentów i zapytania obliczany jest produkt wewnętrzny interpretowany jako dopasowanie. Następnie wyniki dla wszystkich dokumentów są normalizowane do rozkładu prawdopodobieństwa przy wykorzystaniu funkcji \emph{softmax}. Dla fazy zwracania odpowiedzi przekazywana jest pewna liczba najbardziej dopasowanych dokumentów wraz z zapytaniem. Model jest wstępnie trenowany używając nagrody maskowanego modelu językowego (MLM). Zadanie dostrajania polega na przewidzeniu początku i końca odpowiedzi znajdującej się w przekazanym przez krok wyszukiwania korpusie. System osiągał w czasie publikacji najlepsze dostępne wyniki na zbiorach otwartego odpowiadania na pytania: NaturalQuestions,  WebQuestions. \autocite{guu2020realm}
+
+% ------------------------------------------
+\section{Nawigowanie Wikipedii}
+
+Podejściem do wyszukiwania, które nie było wcześniej eksplorowane jest problem nawigacji po grafie dokumentów połączonych hiperłączami. Graf taki oddaje w dobry sposób organizację, przynajmniej części zasobów internetowych. Autorzy tego rozwiązania wybrali Wikipedię jako badany zbiór danych. Celem modelu jest nawigowanie od wybranego węzła grafu do innego węzła, który został wybrany z rządnej dystrybucji prawdopodobieństwa. Rozważanymi rozkładami są: rozkład jednostajny, rozkład o najkrótszych ścieżkach i rozkład odwrotnego przechodzenia grafu. Zadanie jest określone w ten sposób, że odpowiednio podzielone na paragrafy dokumenty są kodowane do reprezentacji przy użyciu sieci transformera. Następnie w każdym kroku nawigacji tzw. sieć 'policy' określa który z możliwych linków wybrać aby dostać się do węzła celu. 
+Po wytrenowaniu system potrafi nawigować z sukcesem ścieżki na grafie Wikipedii w 90\% przypadków. Co ciekawe, autorzy proponują możliwość wykorzystania tego systemu nawigacji do poprawy wyników na zadaniu zwracania właściwych paragrafów. Rozwiązanie działa na zasadzie połączenia z innymi technikami wyszukiwania informacji. Początkowe linki zwracane są za pomocą BM25, kolejno używany jest wytrenowany system do poszerzenia puli dokumentów o te do których nawiguje RFBC (zaproponowane rozwiązanie), a ostatecznie system ponownego obliczania rankingu BigBird jest używany do otrzymania ostatecznej listy linków. Wynik są porównywane dla Recall@1 do Recall@5. Badanie ablacyjne porównujące działanie systemu z oraz bez wyszukiwania ścieżek wskazuje wyraźnie na przydatność jego użycia. Ogólnie wyniki osiągane na zbiorze przy wykorzystaniu tej metody są porównywalne do nowoczesnego systemu RocketQA. \autocite{zaheer2022learning} Warto zauważyć, że zwrócone ścieżki na grafie są łatwo interpretowalne, system działa podobnie jak człowiek korzystający z Wikipedii. Ponadto użyte metody odwołują się w jasny sposób do algorytmów uczenia się gier typu AlphaGo, które zostały już skutecznie wykorzystane, a więc istnieje potencjał do ich ponownego wykorzystania.

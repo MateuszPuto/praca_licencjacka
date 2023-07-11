@@ -1,0 +1,85 @@
+\documentclass[american]{lib/uekthesis}
+
+%####################################################################
+% PREAMBUŁA
+%####################################################################
+
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage[autostyle=true]{csquotes}
+\usepackage[
+   backend=biber,
+   style=apa,
+]{biblatex}
+\usepackage{hyperref}
+
+\addbibresource{citations.bib}
+
+
+%####################################################################
+% INFORMACJE O PRACY DYPLOMOWEJ
+%####################################################################
+
+% wyrazy nie będą dzielone
+\hyphenpenalty 10000
+\exhyphenpenalty 10000
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% tytuł pracy dyplomowej
+\globalFullTitle{Porównanie metod wyszukiwania informacji opartych o uczenie głębokie}
+
+% typ pracy, promotor
+\globalThesisType{Praca licencjacka}
+\globalUnderTheSupervisonOf{Promotor}
+\globalSupervisor{dr Paweł Konkol}
+
+% autor pracy i numer indeksu
+\globalFullAuthor{Mateusz Puto}
+\globalAuthorID{Nr albumu: 219123}
+
+% kierunek i specjalność studiów
+\globalDegreeprogramme{Kierunek: Informatyka stosowana\\Specjalność: Inżynieria oprogramowania}
+
+% nazwa uniwersytetu
+\globalFullUniversity{Uniwersytet Ekonomiczny w Krakowie}
+
+% wydział, kolegium, instytut
+\globalDepartment{Kolegium Nauk o Zarządzaniu i Jakości\\Instytut Zarządzania}
+
+% miejscowość i rok
+\globalCity{Kraków}
+\globalYear{2023}
+
+\begin{document}
+
+% strona tytułowa
+\titlepages
+
+% spis treści
+\tableofcontents
+
+% rozdziały pracy 
+\include{introduction}
+\include{chapter1}
+\include{chapter2}
+\include{chapter3}
+\include{chapter4}
+% \include{conclusion}
+
+% % spis rysunków
+% \newpage
+% \listoffigures
+
+% dodatek, załącznik
+\include{appendix}
+
+% spis tabel
+\newpage
+\listoftables
+
+
+\printbibliography[
+heading=bibintoc,
+title={Bibliografia}
+]
+\end{document}

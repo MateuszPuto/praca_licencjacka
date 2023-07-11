@@ -1,0 +1,326 @@
+\chapter*{Załączniki}
+\label{chap:zalaczniki}
+\addcontentsline{toc}{chapter}{Dodatek}
+
+\section{Słownik pojęć}
+
+.\newline
+\textbf{Dokument} - plik w wyszukiwaniu informacji\newline
+\textbf{Term} - wyraz, podstawowa część tekstu\newline
+\textbf{Stemming} - proces wydobycia ze słowa tematu wyrazu\newline
+\textbf{BM25} - dokładniej Okapi BM25, funkcja rankingowa używana w wyszukiwaniu informacji\newline
+\textbf{P(Q|d)} - wykorzystywany w tekście skrót, określający prawdopodobieństwo warunkowe wystąpienia zapytania pod warunkiem istnienia dokumentu\newline
+\textbf{MRC} - ang. Machine Reading Comprehension\newline
+\textbf{IR} - ang. Information Retrieval (Wyszukiwanie Informacji)\newline
+\textbf{Token} - podstawowa jednostka kodowania tekstu dla przetwarzania przez modele językowe, najczęściej odpowiada części wyrazu\newline 
+\textbf{Trening wstępny} - (ang. pretraining) podejście do trenowania sieci neuronowych, w których model jest najpierw uczony generalnych zależności na całym dostępnym zbiorze danych\newline
+\textbf{Dostrajanie modelu} - (ang. fine-tuning) polega na dostosowywaniu wag sieci, które zostały wstępnie ustalone w fazie treningu wstępnego, do potrzeb specyficznego zadania\newline
+\textbf{Mechanizm uwagi} - (ang. attention mechanism) technika pozwalająca na ważeniu różnych części danych wejściowych (np. tokenów), najczęściej stosowaną wersją jest uwaga typu QKV (zapytanie, klucz, wartość)\newline
+\textbf{Głowa modelu} - (ang. model head) końcowe warstwy sieci neuronowej, często można ją odciąć i dodać inną "głowę", w zależności od przeznaczonego zadania\newline 
+\textbf{Bi-enkoder} - (ang. bi-encoder) spolszczona nazwa, określająca w tym wypadku sieć modelu, która tworzy oddzielne reprezentacje tekstu, które mogą zostać później porównane np. wykorzystując podobieństwo kosinusowe
+\newline
+
+
+\section{Przykładowe wyniki wyszukiwań}
+
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 342115}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
+   \hline
+    1 & 'Evaluation. OT can be initiated when [...]' & 6877831 & 2.8268788 \\
+    2 & 'Traditionally, to receive an evaluation and/or [...]' & 5408137 &  2.588758\\
+    3 & 'Definition of therapist for Students. [...]' & 51075 & -4.2144966 \\
+    4 & 'When choosing a professional to work [...]' & 6956788 & -9.4832325 \\
+    5 & 'When choosing a professional to work [...]' & 6956785 &  -9.625549\\
+    6 & 'Most physical therapist assistants and aides [...]' & 527164 &   -10.133472\\
+    7 & 'John T. Philipsborn, in private practice [...]' & 2586713 & -10.978702 \\
+    8 & 'Although the text in the document [...]' & 220928 &  -11.360448\\
+    9 & 'Fitting regular exercise into your daily [...]' & 85197 &  -11.366676\\
+    10 & 'If this Article is silent or [...]' & 4182815 &  -11.438606\\
+
+\end{tabular}
+\end{table}
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 1069981}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
+   \hline
+    1 & 'The Mustelidae (from Latin mustela, weasel) [...]' & 5450693 & 10.599756 \\
+    2 & 'Mustelid: Mustelid, (family Mustelidae), any [...]' & 7158641 &  7.1848607 \\
+    3 & '1. any small carnivore of the genus [...]' & 6666355 & 6.8733773 \\
+    4 & 'weasel. 1. any small carnivore of the [...]' & 6666356 &  6.52673 \\
+    5 & 'Weasels and all their variants make [...]' & 7460419 &  6.051278\\
+    6 & '[...] Minks and weasels  [...]' & 5098133 & 5.03244 \\
+    7 & 'LarivÃ¨re and Jennings (2009) recognized 57 [...]' & 7158646 & 3.1976109 \\
+    8 & '1 Ferrets come from the same family [...]' & 1795078 &  0.275114 \\
+    9 & 'By the little garden pergola open [...]' & 260407 &  -11.308208 \\
+    10 & 'Buy Ty Ice Age Beanie Babies [...]' & 204680 & -11.419775 \\
+\end{tabular}
+\end{table}
+
+
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 671692}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
+   \hline
+    1 & 'Sleeping problems are common in many [...]' & 6743826 & 5.9614067 \\
+    2 & 'Sleeping problems are common in many [...]' & 7707677 & 5.7937694 \\
+    3 & 'Although causes may differ, the end [...]' & 6466291 & 4.1647916 \\
+    4 & 'Sleep Apnea Related Diseases \& Conditions. [...]' & 691303 & -0.09731629 \\
+    5 & 'Most people go to bed at [...]' & 3339195 & -1.271653 \\
+    6 & 'Find out how to tell if [...]' & 3239019 & -1.4049392\\
+    7 & '1 Before you have surgery, tell your [...]' & 240471 & -1.6717714  \\
+    8 & 'Causes of Childhood Insomnia. One [...]' & 3339199 & -3.1157022 \\
+    9 & 'Most adults need 7 to 9 hours [...]' & 1301637 & -8.087761 \\
+    10 & 'For patients with a co-pay of 20 percent [...]' & 3696268 & -11.304798 \\
+\end{tabular}
+\end{table}
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 342115}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "how therapist refer to dr for evaluation"\\
+   \hline
+    Wygenerowana odp. & 'physical therapist' \\
+    \hline
+    Pewność dopasowania &  2.258343101857463e-06\\
+    \hline
+    Czy błędna? & +\\
+\end{tabular}
+\end{table}
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 1069981}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "what is a mustelidae"\\
+   \hline
+    Wygenerowana odp. & 'a family of carnivorous mammals' \\
+    \hline
+    Pewność dopasowania &  0.5254051089286804\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+ \begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 671692}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "what involves problems sleeping"\\
+   \hline
+    Wygenerowana odp. & 'changes in the brain regions and neurotransmitters that control sleep' \\
+    \hline
+    Pewność dopasowania &  0.332465797662735\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+ \begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 987237}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "who sings the wedding song on walker texas ranger"\\
+   \hline
+    Wygenerowana odp. & 'Bree Anna Hutchinson' \\
+    \hline
+    Pewność dopasowania & 0.16306354105472565\\
+    \hline
+    Czy błędna? & +\\
+\end{tabular}
+\end{table}
+
+ \begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 927553}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "what year was america founded"\\
+   \hline
+    Wygenerowana odp. & 'July 4,1776' \\
+    \hline
+    Pewność dopasowania & 0.7525272965431213\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+ \begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 68095}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "can hives be a sign of pregnancy"\\
+   \hline
+    Wygenerowana odp. & 'Pregnancy hives are common in women of all stages of pregnancy' \\
+    \hline
+    Pewność dopasowania &0.33129480481147766\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+ \begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 447551}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "definition of culture in an organization"\\
+   \hline
+    Wygenerowana odp. & ''CARLAâx80x99s'' \\
+    \hline
+    Pewność dopasowania & 0.144457146525383\\
+    \hline
+    Czy błędna? & +\\
+\end{tabular}
+\end{table}
+
+ \begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 992840}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "meaning of current ratio"\\
+   \hline
+    Wygenerowana odp. & 'a measure of a company's ability to meet its short-term liabilities' \\
+    \hline
+    Pewność dopasowania & 0.11757927387952805\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 272605}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "how long to wait to swim after tattoo"\\
+   \hline
+    Wygenerowana odp. & 'two weeks' \\
+    \hline
+    Pewność dopasowania & 0.5983613133430481\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+\begin{table}[htp!]
+\centering
+\caption{Zapytanie nr. 989894}
+\vspace*{5mm}
+\begin{tabular}{llll}
+   Zapytanie & "who is mark davis"\\
+   \hline
+    Wygenerowana odp. & 'bassist and founding member for the band Emmure' \\
+    \hline
+    Pewność dopasowania & 0.524512767791748\\
+    \hline
+    Czy błędna? & -\\
+\end{tabular}
+\end{table}
+
+
+\section{Listingi najważniejszych części kodu}
+
+\begin{lstlisting}[language=Python, caption=Tworzenie indeksu] 
+def create_index(d: int, description: str, gpu: bool):
+    '''Creates FAISS search index'''
+
+    index = faiss.index_factory(d, description, faiss.METRIC_INNER_PRODUCT)
+
+    if gpu == True:
+        res = faiss.StandardGpuResources()
+        index = faiss.index_cpu_to_gpu(res, 0, index)
+
+    return index
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Przetwarzanie zbioru danych]
+def text_to_tensor(sentence: str, model):
+    '''Converts string to representation using provided encoder model'''
+
+    return model.encode(sentence, convert_to_tensor=False)
+
+def get_entries(filename: str, size: int, encoder):
+    '''Creates matrix of encoded MS MARCO paragraphs'''
+    x = []
+
+    with open(filename, 'r') as file:
+        for i in range(size):
+            paragraph = file.readline().split('\t')[1]
+            encoding = text_to_tensor(paragraph, encoder)
+            x.append(encoding)
+
+    return np.squeeze(np.stack(x))
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Sposób obliczania MRR]
+def mrr_at(k: int, result: list, match_id: int):
+    if match_id in result[:k]:        
+        reciprocal_rank = 1 / (result[:k].index(match_id) + 1)
+    else:
+        reciprocal_rank = 0
+
+    return reciprocal_rank
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[language=Python, caption=Dodawanie rekordów do indeksu]
+def populate_index(xb, index):
+    faiss.normalize_L2(xb.cpu().numpy())
+    xb = xb.cpu()
+
+    index.train(xb)
+    index.add(xb)
+
+d = 384
+description = "Flat"
+
+index = helper_funcs.create_index(d, description, gpu=True)
+xb = torch.load('msmarco-vectors-1.pt')
+populate_index(xb, index)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Wyszukiwanie zasobów]
+def search(query_val: str, num_results: int, encoder, index, normalize:bool=True):
+    vec = text_to_tensor(query_val, encoder)
+            .unsqueeze(0).detach().cpu().numpy().astype('float32')
+
+    if normalize:
+        vec = faiss.normalize_L2(vec)
+
+    d, i = index.search(vec, num_results)
+
+    return (i, d)
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Reranking]
+def rerank(query_val: str, documents: list, indices: list, cross_encoder):
+    query_document = zip([query_val for i in range(len(documents))], documents)
+    q_d = list(query_document)
+    scores = cross_encoder.predict(q_d)
+
+    reranked_results = sorted(zip(zip(indices[0], documents), scores), 
+        key=itemgetter(1), reverse=True)
+
+    return reranked_results
+\end{lstlisting}
