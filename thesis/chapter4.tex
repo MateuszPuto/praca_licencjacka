@@ -3,7 +3,7 @@
 
 \section{Wykorzystywane rozwiązania}
 
-Zamierzonym celem tego rozdziału jest przedstawienie modelu wyszukiwania informacji w celu pokazania możliwości stworzenia, w stosunkowo prosty sposób, nowoczesnej wyszukiwarki informacji bazując na otwartych i ogólnodostępnych komponentach. Podstawą działania tego systemu jest są przede wszystkim udostępnione dzięki platformie HuggingFace modele językowe: enkoder, reranker i model odpowiadania na pytania. Rozwiązania takie są dostępne w bardzo prosty sposób dzięki wykorzystaniu udostępnionej biblioteki programistycznej języka Python. Należy zaznaczyć, że wykorzystanie takich rozwiązań jest nieodpłatne (w zależności od celu wykorzystania i udzielanej przez twórców licencji), oraz wymaga jedynie zwykłej karty graficznej dla mniejszych modeli. Dodatkowo możemy uruchomić te modele językowe z własnego komputera lub wykorzystując zasoby chmurowe. Drugim z kluczowych wykorzystanych rozwiązań jest biblioteka programistyczna Faiss pozwalająca na wyszukiwanie i klastrowanie gęstych reprezentacji wektorowych. Rozwiązanie to jest udostępniane na licencji wolnego oprogramowania MIT, więc można go używać do dowolnych celów. Według twórców tej biblioteki skaluje się ona nawet do miliardów wektorów. W tej pracy wykorzystujemy Faiss jako indeks wyszukiwarki, który umożliwia różne rodzaje kodowania, szybkie wyszukiwanie, a także płynne przejście na zasoby GPU. Trzecim z elementów jest zbiór danych MS MARCO. Jest to, według naszej wiedzy, największy i jednocześnie jedyny tak kompleksowy zbiór danych pozyskany z jednej z najpopularniejszych wyszukiwarek. Pozwala on, na w miarę obiektywne, porównywanie do tej pory niemożliwej do badania jakości różnych wyszukiwarek i sposobów wyszukiwania.\newline
+Zamierzonym celem tego rozdziału jest przedstawienie modelu wyszukiwania informacji w celu pokazania możliwości stworzenia, w stosunkowo prosty sposób, nowoczesnej wyszukiwarki informacji bazując na otwartych i ogólnodostępnych komponentach. Badamy także jakość uzyskiwanych wyników oraz szybkość działania. Podstawą tego systemu jest są przede wszystkim udostępnione dzięki platformie HuggingFace modele językowe: enkoder, reranker i model odpowiadania na pytania. Rozwiązania takie są dostępne w bardzo prosty sposób dzięki wykorzystaniu udostępnionej biblioteki programistycznej języka Python. Należy zaznaczyć, że wykorzystanie takich rozwiązań jest nieodpłatne (w zależności od celu wykorzystania i udzielanej przez twórców licencji), oraz wymaga jedynie zwykłej karty graficznej dla mniejszych modeli. Dodatkowo możemy uruchomić te modele językowe z własnego komputera lub wykorzystując zasoby chmurowe. Drugim z kluczowych wykorzystanych rozwiązań jest biblioteka programistyczna Faiss pozwalająca na wyszukiwanie i klastrowanie gęstych reprezentacji wektorowych. Rozwiązanie to jest udostępniane na licencji wolnego oprogramowania MIT, więc można go używać do dowolnych celów. Według twórców tej biblioteki skaluje się ona nawet do miliardów wektorów. W tej pracy wykorzystujemy Faiss jako indeks wyszukiwarki, który umożliwia różne rodzaje kodowania, szybkie wyszukiwanie, a także płynne przejście na zasoby GPU. Trzecim z elementów jest zbiór danych MS MARCO. Jest to, według naszej wiedzy, największy i jednocześnie jedyny tak kompleksowy zbiór danych pozyskany z jednej z najpopularniejszych wyszukiwarek. Pozwala on, na w miarę obiektywne, porównywanie do tej pory niemożliwej do badania jakości różnych wyszukiwarek i sposobów wyszukiwania.\newline
 
 \begin{itemize}
 \item SentenceTransformers: \url{https://www.sbert.net/}\newline
@@ -11,6 +11,11 @@ Zamierzonym celem tego rozdziału jest przedstawienie modelu wyszukiwania inform
 \item Faiss: \url{https://github.com/facebookresearch/faiss/wiki/}\newline
 \end{itemize}
 
+Tekst tej pracy licencjackiej wraz z wykorzystywanym kodem znajduje się w
+repozytorium GitHub dostępnym pod linkiem \url{https://github.com/MateuszPuto/
+praca_licencjacka}. Nie dołączono do niego zbioru danych ’collectionandqueries’
+dostępnego do pobrania z oficjalnej strony MS MARCO oraz wektorów kodowania
+ze względu na duży rozmiar przestrzeni dyskowej, który zajmują.
 
 \section{Sposób działania systemu}
 Należy mieć na uwadze, że rozwiązanie powstało, aby przetestować możliwości prezentowanego sposobu wyszukiwania. System nie jest w żaden sposób przystosowany, czy też zoptymalizowany jako rozwiązanie wydajne zasobowo do zastosowań produkcyjnych. Struktura kodu zorganizowana została przede wszystkim dla łatwości wprowadzania zmian oraz tak, aby umożliwiała przeprowadzanie różnych eksperymentów. Kod zawiera plik \emph{helper\_funcs.py} z najprzydatniejszymi i często wykorzystywanymi funkcjami. Badania były prowadzone w oddzielnych notatnikach Jupyter Notebook.\newline
@@ -43,8 +48,6 @@ System pozwala na wykonanie pełnego wyszukiwania z możliwością wykorzystania
     Czy błędna? & -\\
 \end{tabular}
 \end{table}
-
-\newpage
 
 Co więcej, aby zobrazować działanie wyszukiwarki, dla kilku z wylosowanych zapytań stworzone zostały tabele tak jak w przykładzie dla zapytania pierwszego z Tabeli 4.2. Zaprezentowane zostało w ten sposób pierwsze dziesięć wyników wyszukiwania, podobnie jak w popularnych wyszukiwarkach internetowych. Dodatkowo wszystkie dziesięć z zapytań, które zostały wybrane, posiada prezentowane dane zapisane w pliku tekstowym, który znajduje się w publicznie udostępnionym repozytorium. 
 
@@ -92,8 +95,7 @@ Pomiarów dokonano w Google Cloud, wykorzystując instancję z kartą graficzną
 \end{tabular}
 \end{table}
 
-Jedną uwagą, jeśli chodzi o porównywanie prezentowanych wyników z tymi dostępnymi na stronie MS MARCO, jest fakt, że oficjalne wynik podają MRR@1000. Jednak znając sposób obliczania miary MRR, można dojść do wniosku, że obliczenie MRR dla mniejszej wartości jest przybliżeniem MRR dla większej wartości, ponieważ im niżej w wynikach pojawia się rezultat, tym mniejszy wpływ na MRR. W przybliżeniu MRR@10 nie bierze pod uwagę maksymalnie mniej niż 10\% wartości MRR@1000. W praktyce te różnice są prawdopodobnie dużo niższe.
-
+Jedną uwagą, jeśli chodzi o porównywanie prezentowanych wyników z tymi dostępnymi na stronie MS MARCO, jest fakt, że oficjalne wynik podają MRR@1000. Jednak znając sposób obliczania miary MRR, można dojść do wniosku, że obliczenie MRR dla mniejszej wartości jest przybliżeniem MRR dla większej wartości, ponieważ im niżej w wynikach pojawia się rezultat, tym mniejszy wpływ na MRR. W przybliżeniu MRR@10 nie bierze pod uwagę maksymalnie mniej niż 10\% wartości MRR@1000. W praktyce te różnice są prawdopodobnie dużo niższe.\newline
 
 \begin{table}[htp]
 \centering

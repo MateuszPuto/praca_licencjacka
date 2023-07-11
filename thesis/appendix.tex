@@ -243,7 +243,6 @@
 \begin{lstlisting}[language=Python, caption=Tworzenie indeksu] 
 def create_index(d: int, description: str, gpu: bool):
     '''Creates FAISS search index'''
-
     index = faiss.index_factory(d, description, faiss.METRIC_INNER_PRODUCT)
 
     if gpu == True:
@@ -274,6 +273,7 @@ def get_entries(filename: str, size: int, encoder):
 
 \begin{lstlisting}[language=Python, caption=Sposób obliczania MRR]
 def mrr_at(k: int, result: list, match_id: int):
+    '''Calculates reciprocal rank; MRR@k = sum(reciprocal_ranks[:])'''
     if match_id in result[:k]:        
         reciprocal_rank = 1 / (result[:k].index(match_id) + 1)
     else:
@@ -285,9 +285,12 @@ def mrr_at(k: int, result: list, match_id: int):
 \newpage
 
 \begin{lstlisting}[language=Python, caption=Dodawanie rekordów do indeksu]
-def populate_index(xb, index):
-    faiss.normalize_L2(xb.cpu().numpy())
-    xb = xb.cpu()
+def populate_index(xb, index, to_cpu):
+    '''Trains and adds vectors to FAISS index'''
+    if to_cpu:
+        xb = xb.cpu().numpy()
+
+    faiss.normalize_L2(xb)
 
     index.train(xb)
     index.add(xb)
@@ -297,30 +300,32 @@ description = "Flat"
 
 index = helper_funcs.create_index(d, description, gpu=True)
 xb = torch.load('msmarco-vectors-1.pt')
-populate_index(xb, index)
+populate_index(xb, index, to_cpu=True)
 \end{lstlisting}
 
 \begin{lstlisting}[language=Python, caption=Wyszukiwanie zasobów]
-def search(query_val: str, num_results: int, encoder, index, normalize:bool=True):
-    vec = text_to_tensor(query_val, encoder)
-            .unsqueeze(0).detach().cpu().numpy().astype('float32')
-
+def search(query_val: str, num_results: int, encoder, index, normalize=True):
+    '''Search query string in FAISS index, returns results and distances'''
+    vec = text_to_tensor(query_val, encoder).unsqueeze(0).detach()
+            .cpu().numpy().astype('float32')
+    
     if normalize:
-        vec = faiss.normalize_L2(vec)
+        faiss.normalize_L2(vec)
 
     d, i = index.search(vec, num_results)
 
     return (i, d)
 \end{lstlisting}
 
-\begin{lstlisting}[language=Python, caption=Reranking]
+\begin{lstlisting}[language=Python, caption=Ponowny ranking]
 def rerank(query_val: str, documents: list, indices: list, cross_encoder):
+    '''Reranks documents with respect to query_val'''
     query_document = zip([query_val for i in range(len(documents))], documents)
     q_d = list(query_document)
     scores = cross_encoder.predict(q_d)
 
-    reranked_results = sorted(zip(zip(indices[0], documents), scores), 
-        key=itemgetter(1), reverse=True)
+    reranked_results = sorted(zip(zip(indices[0], documents), scores),
+            key=itemgetter(1), reverse=True)
 
     return reranked_results
 \end{lstlisting}
