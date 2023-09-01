@@ -79,8 +79,6 @@
   }
 }
 
-
-
 %#########################################################################
 % Wymagane pakiety
 %#########################################################################
@@ -103,7 +101,17 @@
 \RequirePackage{lmodern}               % Font: modern latin
 \RequirePackage{courier}               % Font: courier
 \RequirePackage{xpatch}                % !!! Required for biblatex settings
-\RequirePackage[american]{babel}         %
+\RequirePackage[english]{babel}         %
+\addto\captionsenglish{%
+ \renewcommand\chaptername{Rozdział}}
+ \addto\captionsenglish{%
+ \renewcommand\listtablename{Wykaz tabel}}
+  \addto\captionsenglish{%
+ \renewcommand\tablename{Tabela}}
+  \addto\captionsenglish{%
+ \renewcommand\contentsname{Spis treści}}
+
+
 \RequirePackage{polski}                %
 \RequirePackage{indentfirst}           % uzyskanie wcięcia przy pierwszym akapicie
 \RequirePackage{nameref}               % pakiet referencji do pełnych nazw rozdziałów

@@ -17,7 +17,7 @@
 \textbf{Dostrajanie modelu} - (ang. fine-tuning) polega na dostosowywaniu wag sieci, które zostały wstępnie ustalone w fazie treningu wstępnego, do potrzeb specyficznego zadania\newline
 \textbf{Mechanizm uwagi} - (ang. attention mechanism) technika pozwalająca na ważeniu różnych części danych wejściowych (np. tokenów), najczęściej stosowaną wersją jest uwaga typu QKV (zapytanie, klucz, wartość)\newline
 \textbf{Głowa modelu} - (ang. model head) końcowe warstwy sieci neuronowej, często można ją odciąć i dodać inną "głowę", w zależności od przeznaczonego zadania\newline 
-\textbf{Bi-enkoder} - (ang. bi-encoder) spolszczona nazwa, określająca w tym wypadku sieć modelu, która tworzy oddzielne reprezentacje tekstu, które mogą zostać później porównane np. wykorzystując podobieństwo kosinusowe
+\textbf{Bienkoder} - (ang. bi-encoder) spolszczona nazwa, określająca w tym wypadku sieć modelu, która tworzy oddzielne reprezentacje tekstu, które mogą zostać później porównane np. wykorzystując podobieństwo kosinusowe
 \newline
 
 
@@ -26,7 +26,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 342115}
+\caption{Zapytanie nr. 342115 ("how therapist refer to dr for evaluation")\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
@@ -47,7 +47,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 1069981}
+\caption{Zapytanie nr. 1069981 ("what is a mustelidae")\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
@@ -69,7 +69,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 671692}
+\caption{Zapytanie nr. 671692 ("what involves problems sleeping")\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Ranking & Początek paragrafu & ID dokumentu & Dopasowanie \\
@@ -89,7 +89,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 342115}
+\caption{Zapytanie nr. 342115\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "how therapist refer to dr for evaluation"\\
@@ -104,7 +104,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 1069981}
+\caption{Zapytanie nr. 1069981\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "what is a mustelidae"\\
@@ -119,7 +119,7 @@
 
  \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 671692}
+\caption{Zapytanie nr. 671692\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "what involves problems sleeping"\\
@@ -134,7 +134,7 @@
 
  \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 987237}
+\caption{Zapytanie nr. 987237\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "who sings the wedding song on walker texas ranger"\\
@@ -149,7 +149,7 @@
 
  \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 927553}
+\caption{Zapytanie nr. 927553\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "what year was america founded"\\
@@ -164,7 +164,7 @@
 
  \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 68095}
+\caption{Zapytanie nr. 68095\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "can hives be a sign of pregnancy"\\
@@ -179,7 +179,7 @@
 
  \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 447551}
+\caption{Zapytanie nr. 447551\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "definition of culture in an organization"\\
@@ -194,7 +194,7 @@
 
  \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 992840}
+\caption{Zapytanie nr. 992840\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "meaning of current ratio"\\
@@ -209,7 +209,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 272605}
+\caption{Zapytanie nr. 272605\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "how long to wait to swim after tattoo"\\
@@ -224,7 +224,7 @@
 
 \begin{table}[htp!]
 \centering
-\caption{Zapytanie nr. 989894}
+\caption{Zapytanie nr. 989894\protect\footnotemark[2]}
 \vspace*{5mm}
 \begin{tabular}{llll}
    Zapytanie & "who is mark davis"\\
@@ -237,10 +237,12 @@
 \end{tabular}
 \end{table}
 
+\footnotetext[2]{Opracowanie własne, Pełne wyniki wyszukiwania dla 10 przedstawionych zapytań są dostępne pod adresem: \url{https://github.com/MateuszPuto/praca_licencjacka/tree/main/exmpl_queries}.}
+\break
 
 \section{Listingi najważniejszych części kodu}
 
-\begin{lstlisting}[language=Python, caption=Tworzenie indeksu] 
+\begin{lstlisting}[language=Python, caption={Tworzenie indeksu\protect\footnotemark[3]}] 
 def create_index(d: int, description: str, gpu: bool):
     '''Creates FAISS search index'''
     index = faiss.index_factory(d, description, faiss.METRIC_INNER_PRODUCT)
@@ -252,7 +254,7 @@ def create_index(d: int, description: str, gpu: bool):
     return index
 \end{lstlisting}
 
-\begin{lstlisting}[language=Python, caption=Przetwarzanie zbioru danych]
+\begin{lstlisting}[language=Python, caption={Przetwarzanie zbioru danych\protect\footnotemark[3]}]
 def text_to_tensor(sentence: str, model):
     '''Converts string to representation using provided encoder model'''
 
@@ -271,7 +273,7 @@ def get_entries(filename: str, size: int, encoder):
     return np.squeeze(np.stack(x))
 \end{lstlisting}
 
-\begin{lstlisting}[language=Python, caption=Sposób obliczania MRR]
+\begin{lstlisting}[language=Python, caption={Sposób obliczania MRR\protect\footnotemark[3]}]
 def mrr_at(k: int, result: list, match_id: int):
     '''Calculates reciprocal rank; MRR@k = sum(reciprocal_ranks[:])'''
     if match_id in result[:k]:        
@@ -284,7 +286,7 @@ def mrr_at(k: int, result: list, match_id: int):
 
 \newpage
 
-\begin{lstlisting}[language=Python, caption=Dodawanie rekordów do indeksu]
+\begin{lstlisting}[language=Python, caption={Dodawanie rekordów do indeksu\protect\footnotemark[3]}]
 def populate_index(xb, index, to_cpu):
     '''Trains and adds vectors to FAISS index'''
     if to_cpu:
@@ -303,7 +305,7 @@ xb = torch.load('msmarco-vectors-1.pt')
 populate_index(xb, index, to_cpu=True)
 \end{lstlisting}
 
-\begin{lstlisting}[language=Python, caption=Wyszukiwanie zasobów]
+\begin{lstlisting}[language=Python, caption={Wyszukiwanie zasobów\protect\footnotemark[3]}]
 def search(query_val: str, num_results: int, encoder, index, normalize=True):
     '''Search query string in FAISS index, returns results and distances'''
     vec = text_to_tensor(query_val, encoder).unsqueeze(0).detach()
@@ -317,7 +319,7 @@ def search(query_val: str, num_results: int, encoder, index, normalize=True):
     return (i, d)
 \end{lstlisting}
 
-\begin{lstlisting}[language=Python, caption=Ponowny ranking]
+\begin{lstlisting}[language=Python, caption={Ponowny ranking\protect\footnotemark[3]}]
 def rerank(query_val: str, documents: list, indices: list, cross_encoder):
     '''Reranks documents with respect to query_val'''
     query_document = zip([query_val for i in range(len(documents))], documents)
@@ -329,3 +331,6 @@ def rerank(query_val: str, documents: list, indices: list, cross_encoder):
 
     return reranked_results
 \end{lstlisting}
+
+\footnotetext[3]{Opracowanie własne,
+źródło: \url{https://github.com/MateuszPuto/praca\_licencjacka/tree/main/code}}

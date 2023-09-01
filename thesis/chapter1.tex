@@ -1,23 +1,29 @@
 \chapter{Klasyczne techniki i zastosowania wyszukiwania informacji}
 \label{chap:pierwszy}
 
+\section{Nota historyczna}
+
+
+Początki gromadzenia i systematycznego przetwarzania informacji są ściśle związane z pojawieniem się pisma oraz trwałych materiałów piśmienniczych. Jednak aby mówić o procesie wyszukiwania informacji przyszło nam poczekać do powstania antycznych bibliotek. Biblioteka Aleksandryjska, chociaż na pewno nie była pierwszym tworem posiadającym duży zbiór tekstów, wyróżnia się nie tylko swoją częściowo legendarną historią. Dawne podania mówią, że Aleksander Wielki po zobaczeniu biblioteki Ashurbanipala w Niniwie powziął się stworzenia uniwersalnej biblioteki zawierającej wszystkie dzieła podbitych narodów \autocite{phillips2010}. Szacuje się, że kolekcja składała się, w swoim szczytowym okresie, z od 400,000 do 700,000 zwojów, pozyskanych poprzez zakupy, kopiowanie, konfiskaty z przepływających statków czy nawet podstęp jak w przypadku dzieł Ateńskich  \autocite{phillips2010}. Przy tak dużej ilości materiałów źródłowych organizacja przechowywania i wyszukiwania tekstów nabiera niebagatelnego znaczenia. Jednym z patronów takiego systemu jest Zenodot, pierwszy bibliotekarz Wielkiej Biblioteki Aleksandryjskiej. Wprowadził on alfabetyczną organizację dzieł po pierwszej literze imienia autora, co było rozwiązaniem w tamtym czasie niespotykanym \autocite{phillips2010}. To jednak Kallimach z Cyreny, uważany jest za twórcę \textit{pinakes} - 120 zwojowego katalogu autorów i ich dzieł. Informacje o autorze były dodatkowo poszerzone o notę biograficzną, natomiast wpisy o dziełach, zawierały pierwsze słowa utworu, jak i liczbę linijek, które się na niego składały. \autocite{phillips2010}. \newline
+
+
+Systemy katalogowe były szeroko używane w zastosowaniach bibliotecznych, lecz proces ten nie został zautomatyzowany przez długi okres. Pierwsze rudymentarne techniki wyszukiwania przy użyciu narzędzi pojawiają się na początku XX wieku. Soper wniósł w 1918 r. o patent na przeszukiwanie katalogu przy użyciu kart z dziurkami i światła, które przechodziło przez odpowiednio umieszczone za sobą karty \autocite{sandersoncroft2012}. Goldberg stworzył w latach 20-tych i 30-tych XX wieku urządzenie pozwalające na zautomatyzowane porównywanie strony dokumentu z jego negatywem na rolce filmowej. Kiedy dokładna zgodność została zarejestrowana na fotokomórce, urządzenie wyświetlało zatrzymany mikrofilm \autocite{sandersoncroft2012}. W roku 1950 zbudowano system wyszukiwania oparty o karty perforowane, działający z szybkością 600 kart na minutę. Wtedy też Calvin Mooers, prezentujący pracę naukową, użył jako pierwszy terminu 'wyszukiwanie informacji' (ang. 'information retrieval') \autocite{sandersoncroft2012}. W brytyjskim Royal Society rozważano już jednak dwa lata wcześniej możliwość zastosowania technologii, która wkrótce miała się okazać przełomowa dla wszelkich zadań obliczeniowych. Holmstrom opisywał wtedy komputer UNIVAC, mogący wyszukiwać odniesienia w tekście umieszczonym na taśmie magnetycznej, na podstawie powiązanych z nimi kodów\autocite{sandersoncroft2012}. \newline
+
 %--------------------------------------------------
 \section{Wyszukiwanie informacji}
 
 Najprostszym, niedojrzałym sposobem wyszukiwania informacji, w pewnym zbiorze dokumentów, jest wyszukiwanie po jasno zdefiniowanych meta-informacjach. Chociaż oczywistym problemem, w korzystaniu z takiego systemu, jest fakt, iż musimy znać wcześniej odpowiednie informacje o wyszukiwanym dokumencie, takie jak nazwisko autora, tytuł czy numer, to tego rodzaju systemy były wykorzystywane nie tylko w urzędach czy bibliotekach, ale również w wyszukiwaniu internetowym do lat 90-tych.\newline
 
-Jako bardziej wygoda metoda wyszukiwania, wykorzystanie znalazł model boolowski. Zakłada on, że dokument jest zbiorem wyrazów, a więc pomija ilość wystąpień, kolejność występowania oraz powiązania między wyrazami. Na jego podstawie można stworzyć system, który po uprzednim zindeksowaniu wyrazów, pozwoli na wyszukiwanie wspólnych
+Jako bardziej wygodna metoda wyszukiwania, wykorzystanie znalazł model boolowski. Zakłada on, że dokument jest zbiorem wyrazów, a więc pomija ilość wystąpień, kolejność występowania oraz powiązania między wyrazami. Na jego podstawie można stworzyć system, który po uprzednim zindeksowaniu wyrazów, pozwoli na wyszukiwanie wspólnych
 wystąpień wyrażeń w tekście przy pomocy powiązania ich operatorami AND, OR a nawet NEAR. W roku
 2005 system oparty o model boolowski był nadal wykorzystywany jako domyślny sposób
-wyszukiwania w systemie wyszukiwania dokumentów prawnych firmy Westlaw \autocite[s. 38-56]{introtoinformationretrieval}. \newline\newline
-
-Wykorzystanie tego rozwiązania wiąże się jednak z koniecznością wcześniejszego przetworzenia informacji w dokumentach do postaci wyszukiwalnego odwróconego indeksu. Składa
+wyszukiwania w systemie wyszukiwania dokumentów prawnych firmy Westlaw \autocite[s. 38-56]{introtoinformationretrieval}. Wykorzystanie tego rozwiązania wiąże się jednak z koniecznością wcześniejszego przetworzenia informacji w dokumentach do postaci wyszukiwalnego odwróconego indeksu. Składa
 się on z pól {\it klucz}: {\it wartość}, gdzie kluczem jest słowo, unikalny identyfikator słowa, ewentualnie
 pewna kombinacja słów taka jak n-gram. Ponadto dla każdego klucza mogą być przechowywane
-dodatkowe informacje, takie jak częstość występowania. W polu wartości przechowywane są powiązane z danym termem dokumenty, a raczej ich identyfikatory, które znajdują się w pewnego
+dodatkowe informacje, takie jak częstość występowania. W polu wartości przechowywane są powiązane z danym słowem dokumenty, a raczej ich identyfikatory, które znajdują się w pewnego
 rodzaju kolekcji. Kolekcja jest często posortowana, a każdy zapis związany z dokumentem może
 posiadać także dodatkowe informacje, na przykład pozycyjne określenie umiejscowienia
-wystąpienia termu w dokumencie. Wartości znajdujące się w odwróconym indeksie są zazwyczaj posortowane, co
+wystąpienia danego słowa w dokumencie. Wartości znajdujące się w odwróconym indeksie są zazwyczaj posortowane, co
 przyspiesza operacje, które chcielibyśmy na nim wykonywać \autocite[s. 104-122]{introtoinformationretrieval}.\newline
 
 Kluczowym uwarunkowaniem dla konstrukcji odwróconego indeksu, dla dużych zbiorów
@@ -97,7 +103,7 @@ wszystkie słowa kluczowe otrzymujemy ostateczny wynik dla zapytania \autocite[s
 Podstawowym pytaniem, które należy sobie zadać przy tworzeniu systemu wyszukiwania
 mierzącego stopień dopasowania, jest kwestia tego, co chcemy osiągnąć poprzez wybrany system
 rankingu. Z filozoficznego punktu widzenia można założyć, że chcielibyśmy zmaksymalizować stopień
-zadowolenia użytkownika wyszukiwarki poprzez dostarczanie, jak najbardziej przydatnych mu informacji, jako pierwszych wyników. Ważną kwestią, w takim przypadku, jest określenie czy
+zadowolenia użytkownika wyszukiwarki poprzez dostarczanie jak najbardziej przydatnych mu informacji, jako pierwszych wyników. Ważną kwestią, w takim przypadku, jest określenie czy
 maksymalizujemy bezwzględną przydatność, pomijając zbieżności, które mogą występować między
 dokumentami, czy preferujemy optymalizować krańcową przydatność, a więc taką która bierze pod
 uwagę zawartość informacyjną innych wysoko pozycjonowanych odpowiedzi do zapytania. Ponadto
@@ -108,7 +114,7 @@ niekoniecznie są one związane z centralnym sposobem działania \autocite[s. 20
 
 Wydaje się, iż dobrym sygnałem dopasowania rezultatów wyszukiwania do zadanego
 zapytania byłoby ocenienie jakości wyników przez użytkownika (ang. 'relevance feedback'). Dane te
-można by wykorzystywać do poprawiana jakości systemu wyszukującego wyniki, ale również w celu interaktywnej pracy z wyszukiwarką. W takim układzie użytkownik mógłby wybierać zwrócone wynik,
+można by wykorzystywać do poprawiana jakości systemu wyszukującego wyniki, ale również w celu interaktywnej pracy z wyszukiwarką. W takim układzie użytkownik mógłby wybierać zwrócone wyniki,
 które okazały mu się przydatne, natomiast wyszukiwarka próbowałaby ulepszyć kolejne zwrócone
 wyniki na podstawie tego sygnału zwrotnego. W przestrzeni wektorowej wykorzystanie tego pomysłu opiera się na teorii mówiącej, iż aby otrzymać wektor, według którego będziemy
 wyszukiwać, należy do początkowego wektora zapytania dodać średnią ważoną wektorów dokumentów dopasowanych, a następnie odjąć od niej
@@ -249,7 +255,7 @@ będzie mu podpowiadać możliwe kolejne słowa w zapytaniu. Takie rozwiązanie 
 przyrostowego wyszukiwania (ang. 'incremental search') lub sugestii w czasie rzeczywistym (ang. 'real-time suggestion', 'search-as-you-type').
 Możliwe rozwiązania algorytmiczne pozwalające zastosować taki mechanizm to skorzystanie z
 wcześniej utworzonego drzewa Trie przechowującego przedrostki do indeksowanych wyrazów, w taki
-sposób, że łatwo podać możliwe kontynuacje wyrazów, gdy znamy ich przedrostki. Algolia wykorzystuje
+sposób, że łatwo można podać możliwe kontynuacje wyrazów, gdy znamy ich przedrostki. Algolia wykorzystuje
 skompresowane drzewo trie (ang. 'radix tree'), które oblicza wykorzystując minimalną możliwą ilość
 pamięci operacyjnej, aby zwolnić miejsce dla strukury indeksującej \autocite{insidealgoliapart-b}. Przy wpisywaniu danego
 zapytania użytkownicy popełniają błędy we wprowadzonych literach. Aby temu zapobiec silnik Algolii
